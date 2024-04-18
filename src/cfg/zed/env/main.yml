@@ -1,0 +1,11 @@
+
+parameters:
+    VARIANT_NAME        : = ARGUMENTS['bv']
+    PROJECT_NAME        : = VARIANT_NAME
+    TOP_NAME            : top
+    TESTBENCH_NAME      : top_tb
+    DEVICE              : xc7a35ticsg324-1L
+                        
+    DATA_WIDTH          : 4
+    CLK_OUT_PHASE_SHIFT : 220
+

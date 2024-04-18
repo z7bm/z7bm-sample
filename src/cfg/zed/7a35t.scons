@@ -1,0 +1,28 @@
+#-------------------------------------------------------------------------------
+#
+#    Variant construction script
+#
+#    Author: Harry E. Zhurov
+#
+#-------------------------------------------------------------------------------
+
+import os
+import sys
+
+sys.path.append(os.path.join(os.pardir, 'common'))
+
+from build_base import *
+
+#-------------------------------------------------------------------------------
+#
+#    Environment
+#
+Import('envx')
+
+envx['ARGUMENTS']            = ARGUMENTS
+envx['COMMAND_LINE_TARGETS'] = COMMAND_LINE_TARGETS
+
+bv = BuildBase(envx)
+
+#-------------------------------------------------------------------------------
+
