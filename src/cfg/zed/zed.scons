@@ -11,7 +11,7 @@ import sys
 
 sys.path.append(os.path.join(os.pardir, 'common'))
 
-from build_base import *
+from build_main import *
 
 #-------------------------------------------------------------------------------
 #
@@ -22,7 +22,16 @@ Import('envx')
 envx['ARGUMENTS']            = ARGUMENTS
 envx['COMMAND_LINE_TARGETS'] = COMMAND_LINE_TARGETS
 
-bv = BuildBase(envx)
+
+class BuildZed(BuildMain):
+
+    def __init__(self, **src_dict):
+        super().__init__(**src_dict)
+
+bv = BuildZed(env     = envx,
+              src_syn = 'src_syn.yml',
+              src_sim = 'src_sim.yml',
+              bd      = 'bd.yml')
 
 #-------------------------------------------------------------------------------
 
