@@ -2,7 +2,7 @@
 #
 #    Build System Library
 #
-#    Author: UG NGFW Team
+#    Author: Harry E. Zhurov
 #
 #-------------------------------------------------------------------------------
 
