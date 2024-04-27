@@ -106,7 +106,7 @@ class BuildMain(BuildBase):
     def add_main_targets(self):
         super().add_main_targets()
 
-        self.envx.AddPreAction(self.WLib, create_test_header)
+        #self.envx.AddPreAction(self.WLib, create_test_header)
         #self.envx.AddPreAction(self.WLib, compile_tb_pkg)
 
     def add_phony_targets(self):

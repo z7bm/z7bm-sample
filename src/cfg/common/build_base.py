@@ -114,9 +114,7 @@ class BuildBase:
         self.envx.Append( CONFIG_SEARCH_PATH = get_search_path() )  # search path list for settings files (typically *.yml)
         self.envx.Append( INC_PATH = [self.envx['BUILD_SRC_PATH'], self.dirs.LIB] )
         self.envx.Append( SIM_INC_PATH = self.envx['INC_PATH'])
-        self.envx.Append( SIM_INC_PATH = os.path.join(self.dirs.SRC_SIM, 'lib') )
-        self.envx.Append( SIM_INC_PATH = os.path.join(self.dirs.SRC_SIM, 'tests') )
-        self.envx.Append( SIM_INC_PATH = os.path.join(self.dirs.SRC_SIM, cfg.VARIANT_NAME) )
+        self.envx.Append( SIM_INC_PATH = self.dirs.SRC_SIM )
         self.envx.Append( SRC_SIM = self.dirs.SRC_SIM)
 
         bslib.process_arguments(self)
@@ -130,7 +128,7 @@ class BuildBase:
         #-------------------------------------------------------------
         vlog_flags  = ' -O5 -timescale=1ns/1ps +define+' + '+'.join(self.envx['PRJ_MACRODEFS'])
         vlog_flags += ' -ccflags -I' + os.path.join(env.XILINX_HLS, 'include') + ' -ccflags "-std=c++14" -ccflags "-Wall" -ccflags "-Wpedantic"'
-        vlog_flags += ' -L tb_pkg'
+        #vlog_flags += ' -L tb_pkg'
         vlog_flags += ' -L ' + os.path.join(env.QUESTABASE, 'uvm-1.2')
         vlog_flags += ' -suppress 2897 -suppress 13314'
         vlog_flags += ' +define+SV_SEED=' + self.envx['SV_SEED']
@@ -140,7 +138,7 @@ class BuildBase:
 
         #-------------------------------------------------------------
         vopt_flags  = ' -O5 +acc=npr -L wlib -L unifast_ver -L unisims_ver -L unimacro_ver -L secureip -L xpm -suppress 2912'
-        vopt_flags += ' -L tb_pkg'
+        #vopt_flags += ' -L tb_pkg'
         vopt_flags += ' -L ' + os.path.join(env.QUESTABASE, 'uvm-1.2')
 
         #-------------------------------------------------------------
