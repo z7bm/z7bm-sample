@@ -1,4 +1,6 @@
 
 sources:
     - src/syn/top.sv
+    - src/syn/axi3.sv
+    - src/syn/ps7_hw.sv
 

@@ -9,28 +9,39 @@
 `include "cfg_params.svh"
 
 
-module automatic top
-#(
-    localparam DATA_W = `DATA_WIDTH
-)
+module automatic lwircam
 (
-`ifdef DIFF_REFCLK
-    input  logic              ref_clk_p,
-    input  logic              ref_clk_n,
-`else                         
-    input  logic              ref_clk,
-`endif
+    // External memory, Bank 502
+    inout  [    `DDR_ADDR_W-1:0]  ddr_addr,
+    inout  [      `DDR_BA_W-1:0]  ddr_ba,
+    inout                         ddr_cas_n,
+    inout                         ddr_ck_n,
+    inout                         ddr_ck_p,
+    inout                         ddr_cke,
+    inout                         ddr_cs_n,
+    inout  [`DDR_LANE_COUNT-1:0]  ddr_dm,
+    inout  [      `DDR_DATA_W:0]  ddr_dq,
+    inout  [`DDR_LANE_COUNT-1:0]  ddr_dqs_n,
+    inout  [`DDR_LANE_COUNT-1:0]  ddr_dqs_p,
+    inout                         ddr_odt,
+    inout                         ddr_ras_n,
+    inout                         ddr_reset_n,
+    inout                         ddr_we_n,
 
-    output logic              clk_out,
+    inout                         ddr_vrn,
+    inout                         ddr_vrp,
 
-    input  logic [DATA_W-1:0] dinp_a,
-    input  logic              valid_a,
 
-    input  logic [DATA_W-1:0] dinp_b,
-    input  logic              valid_b,
+    // Bank 500, 3.3V
+    input                         ps_clk,
+    inout                         ps_porb,
+    
+    // Bank 501, 1.8V
+    inout  [    `MIO_DATA_W-1:0]  mio,
+    inout                         ps_srstb,
 
-    output logic [ DATA_W:0]  out,
-    output logic              valid_out
+    //
+    output logic out
 );
 
 //------------------------------------------------------------------------------
@@ -47,25 +58,10 @@ module automatic top
 //
 //    Objects
 //
-`ifdef DIFF_REFCLK
-logic ref_clk;
-`endif
+logic   fclk0;
+logic   fclk0_rst_n;
+axi3_if mmr();
 
-logic clk;
-logic clk2;
-logic pll_locked;
-logic rst;
-
-logic [DATA_W-1:0] a_reg       = 0;
-logic [DATA_W-1:0] b_reg       = 0;
-logic              valid_a_reg = 0;
-logic              valid_b_reg = 0;
-
-`ifdef ADDER_MODULE
-dinp_if #( .DATA_W ( DATA_W   ) ) a();
-dinp_if #( .DATA_W ( DATA_W   ) ) b();
-dout_if #( .DATA_W ( DATA_W+1 ) ) o();
-`endif // ADDER_MODULE
 
 //------------------------------------------------------------------------------
 //
@@ -91,94 +87,51 @@ assign dbg_pll_locked = pll_locked;
 //
 //    Logic
 //
-assign rst     = ~pll_locked;
-
-always_ff @(posedge clk) begin
-    a_reg       <= dinp_a;
-    b_reg       <= dinp_b;
-    valid_a_reg <= valid_a;
-    valid_b_reg <= valid_b;
-end
-
-`ifdef ADDER_MODULE
-
-assign a.valid   = valid_a_reg;
-assign b.valid   = valid_b_reg;
-assign a.data    = a_reg;
-assign b.data    = b_reg;
-
-always_ff @(posedge clk) begin
-    out       <= o.data;
-    valid_out <= o.valid;
-end
-
-`else
-
-always_ff @(posedge clk) begin
-    if(rst) begin
-        out <= 0;
-    end
-    else begin
-        valid_out <= 0;
-        if(valid_a_reg && valid_b_reg) begin
-            out       <= a_reg + b_reg;
-            valid_out <= 1;
-        end
-    end
-end
-
-`endif // ADDER_MODULE
-
 
 //------------------------------------------------------------------------------
 //
 //    Instances
 //
-`ifdef DIFF_REFCLK
-IBUFDS diff_clk_200
-(
-    .I  ( ref_clk_p ),
-    .IB ( ref_clk_n ),
-    .O  ( ref_clk   )
-);
-`endif
-//------------------------------------------------------------------------------
-pll pll_inst
-(
-    .clk_in1  ( ref_clk    ),
-    .clk_out1 ( clk        ),
-    .clk_out2 ( clk2       ),
-    .locked   ( pll_locked )
-);
 //-------------------------------------------------------------------------------
-ODDR 
+ps7_hw_m
 #(
-   .DDR_CLK_EDGE ("OPPOSITE_EDGE" ),  // "OPPOSITE_EDGE" or "SAME_EDGE"
-   .INIT         (1'b0            ),  // Initial value of Q: 1'b0 or 1'b1
-   .SRTYPE       ("SYNC"          )   // Set/Reset type: "SYNC" or "ASYNC"
-) 
-clk_out_gen 
+    .DDR_ADDR_W     ( `DDR_ADDR_W     ),
+    .DDR_BA_W       ( `DDR_BA_W       ),
+    .DDR_DATA_W     ( `DDR_DATA_W     ),
+    .DDR_LANE_COUNT ( `DDR_LANE_COUNT ),
+    .MIO_DATA_W     ( `MIO_DATA_W     )
+
+)
+ps7_hw
 (
-    .C  ( clk2    ),  // 1-bit clock input
-    .CE ( 1'b1    ),  // 1-bit clock enable input
-    .D1 ( 1'b1    ),  // 1-bit data input (positive edge)
-    .D2 ( 1'b0    ),  // 1-bit data input (negative edge)
-    .R  ( 1'b0    ),  // 1-bit reset
-    .S  ( 1'b0    ),  // 1-bit set
-    .Q  ( clk_out )   // 1-bit DDR output
+    .ddr_addr          ( ddr_addr     ),
+    .ddr_ba            ( ddr_ba       ),
+    .ddr_cas_n         ( ddr_cas_n    ),
+    .ddr_ck_n          ( ddr_ck_n     ),
+    .ddr_ck_p          ( ddr_ck_p     ),
+    .ddr_cke           ( ddr_cke      ),
+    .ddr_cs_n          ( ddr_cs_n     ),
+    .ddr_dm            ( ddr_dm       ),
+    .ddr_dq            ( ddr_dq       ),
+    .ddr_dqs_n         ( ddr_dqs_n    ),
+    .ddr_dqs_p         ( ddr_dqs_p    ),
+    .ddr_odt           ( ddr_odt      ),
+    .ddr_ras_n         ( ddr_ras_n    ),
+    .ddr_reset_n       ( ddr_reset_n  ),
+    .ddr_we_n          ( ddr_we_n     ),
+    .ddr_vrn           ( ddr_vrn      ),
+    .ddr_vrp           ( ddr_vrp      ),
+    .mio               ( mio          ),
+    .ps_clk            ( ps_clk       ),
+    .ps_porb           ( ps_porb      ),
+    .ps_srstb          ( ps_srstb     ),
+    .fclk0             ( fclk0        ),
+    .fclk0_rst_n       ( fclk0_rst_n  ),
+    .mmr               ( mmr          )
+
 );
+
 //-------------------------------------------------------------------------------
-`ifdef ADDER_MODULE
-adder_m adder
-(   
-    .clk ( clk ),
-    .rst ( rst ),
-    .a   ( a   ),
-    .b   ( b   ),
-    .out ( o   )
- );
-`endif // ADDER_MODULE
-//-------------------------------------------------------------------------------
-endmodule
+endmodule : lwircam
 //-------------------------------------------------------------------------------
 

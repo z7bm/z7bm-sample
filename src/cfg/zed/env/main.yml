@@ -9,3 +9,9 @@ parameters:
     DATA_WIDTH          : 4
     CLK_OUT_PHASE_SHIFT : 220
 
+    DDR_ADDR_W          : 14
+    DDR_BA_W            : 3
+    DDR_DATA_W          : 32
+    DDR_LANE_COUNT      : 4
+    MIO_DATA_W          : 54
+
