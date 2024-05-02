@@ -4,77 +4,7 @@
     VendorName="SlickEdit"
     WorkingDir=".">
     <Config
-        Name="7a50t"
-        OutputFile=""
-        CompilerConfigName="Latest Version">
-        <Menu>
-            <Target
-                Name="Compile"
-                CaptureOutputWith="ProcessBuffer"
-                SaveOption="SaveAll"
-                ClearProcessBuffer="1"
-                RunFromDir="%rw"
-                MenuCaption="Compile Simulator Project">
-                <Exec CmdLine="etime.sh scons -s variant=%bn wlib"/>
-            </Target>
-            <Target
-                Name="Build"
-                CaptureOutputWith="ProcessBuffer"
-                SaveOption="SaveAll"
-                RunFromDir="%rw"
-                ClearProcessBuffer="1"
-                MenuCaption="&amp;Build Vivado Project"
-                Verbose="1">
-                <Exec CmdLine="etime.sh scons -s variant=%bn prjbld"/>
-            </Target>
-            <Target
-                Name="Rebuild"
-                CaptureOutputWith="ProcessBuffer"
-                SaveOption="SaveAll"
-                RunFromDir="%rw/cfg/xilinx_7A50T"
-                ClearProcessBuffer="1"
-                Verbose="1">
-                <Exec CmdLine="make clean all"/>
-            </Target>
-            <Target
-                Name="Debug"
-                MenuCaption="&amp;Debug"
-                SaveOption="SaveNone"
-                RunInXterm="1"
-                RunFromDir="%rw">
-                <Exec CmdLine="scons -s qs_gui"/>
-            </Target>
-            <Target
-                Name="Sim Run"
-                MenuCaption="Sim &amp;Run"
-                RunFromDir="%rw"
-                CaptureOutputWith="ProcessBuffer"
-                SaveOption="SaveAll"
-                ClearProcessBuffer="1">
-                <Exec CmdLine="etime.sh scons -s variant=%bn qs_run"/>
-            </Target>
-            <Target
-                Name="Create Vivado Project"
-                MenuCaption="Create &amp;Vivado Project"
-                RunFromDir="%rw"
-                CaptureOutputWith="ProcessBuffer"
-                SaveOption="SaveAll"
-                ClearProcessBuffer="1">
-                <Exec CmdLine="etime.sh scons -s variant=%bn prj"/>
-            </Target>
-            <Target
-                Name="Open Vivado Project"
-                MenuCaption="&amp;Open Vivado Project"
-                RunFromDir="%rw"
-                CaptureOutputWith="ProcessBuffer"
-                SaveOption="SaveAll"
-                ClearProcessBuffer="1">
-                <Exec CmdLine="etime.sh scons -s variant=%bn prjopen"/>
-            </Target>
-        </Menu>
-    </Config>
-    <Config
-        Name="7a35t"
+        Name="zed"
         OutputFile=""
         CompilerConfigName="Latest Version">
         <Menu>
@@ -95,7 +25,7 @@
                 MenuCaption="&amp;Build Vivado Project"
                 Verbose="1"
                 RunFromDir="%rw">
-                <Exec CmdLine="etime.sh scons -s variant=%bn prjbld"/>
+                <Exec CmdLine="etime.sh scons -s variant=%bn prjsyn"/>
             </Target>
             <Target
                 Name="Rebuild"
@@ -103,8 +33,8 @@
                 SaveOption="SaveAll"
                 ClearProcessBuffer="1"
                 Verbose="1"
-                RunFromDir="%rw/cfg/xilinx_7A35T">
-                <Exec CmdLine="make clean all"/>
+                RunFromDir="%rw">
+                <Exec CmdLine="scons bv=%bn -c &amp;&amp; etime.sh scons -s bv=%bn prjsyn"/>
             </Target>
             <Target
                 Name="Debug"
@@ -143,79 +73,7 @@
             </Target>
         </Menu>
     </Config>
-    <Config
-        Name="ac701"
-        OutputFile=""
-        CompilerConfigName="Latest Version">
-        <Menu>
-            <Target
-                Name="Compile"
-                CaptureOutputWith="ProcessBuffer"
-                SaveOption="SaveAll"
-                ClearProcessBuffer="1"
-                RunFromDir="%rw"
-                MenuCaption="Compile Simulator Project">
-                <Exec CmdLine="etime.sh scons -s wlib"/>
-            </Target>
-            <Target
-                Name="Build"
-                CaptureOutputWith="ProcessBuffer"
-                SaveOption="SaveAll"
-                ClearProcessBuffer="1"
-                MenuCaption="&amp;Build Vivado Project"
-                Verbose="1"
-                RunFromDir="%rw">
-                <Exec CmdLine="etime.sh scons -s prjbld"/>
-            </Target>
-            <Target
-                Name="Rebuild"
-                CaptureOutputWith="ProcessBuffer"
-                SaveOption="SaveAll"
-                ClearProcessBuffer="1"
-                Verbose="1"
-                RunFromDir="%rw/cfg/xilinx_AC701">
-                <Exec CmdLine="make clean all"/>
-            </Target>
-            <Target
-                Name="Debug"
-                MenuCaption="&amp;Debug"
-                SaveOption="SaveNone"
-                RunInXterm="1"
-                RunFromDir="%rw">
-                <Exec CmdLine="scons -s qs_gui"/>
-            </Target>
-            <Target
-                Name="Sim Run"
-                MenuCaption="Sim &amp;Run"
-                RunFromDir="%rw"
-                CaptureOutputWith="ProcessBuffer"
-                SaveOption="SaveAll"
-                ClearProcessBuffer="1">
-                <Exec CmdLine="etime.sh scons -s qs_run"/>
-            </Target>
-            <Target
-                Name="Create Vivado Project"
-                MenuCaption="Create &amp;Vivado Project"
-                RunFromDir="%rw"
-                CaptureOutputWith="ProcessBuffer"
-                SaveOption="SaveAll"
-                ClearProcessBuffer="1">
-                <Exec CmdLine="etime.sh scons -s prj"/>
-            </Target>
-            <Target
-                Name="Open Vivado Project"
-                MenuCaption="&amp;Open Vivado Project"
-                RunFromDir="%rw"
-                CaptureOutputWith="ProcessBuffer"
-                SaveOption="SaveAll"
-                ClearProcessBuffer="1">
-                <Exec CmdLine="etime.sh scons -s prjopen"/>
-            </Target>
-        </Menu>
-    </Config>
     <CustomFolders></CustomFolders>
-    <List Name="RTE">
-    </List>
     <Files AutoFolders="DirectoryView">
         <F
             N="*"
@@ -223,4 +81,6 @@
             Excludes=""
             L="1"/>
     </Files>
+    <List Name="RTE">
+    </List>
 </Project>
