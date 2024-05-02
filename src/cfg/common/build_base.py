@@ -118,7 +118,7 @@ class BuildBase:
         self.envx.Append( SRC_SIM = self.dirs.SRC_SIM)
 
         bslib.process_arguments(self)
-        bslib.process_prjopt(self)
+        bslib.create_prjopt_files(self)
         bslib.set_sv_seed(self)
 
         #----------------------------------------------------------------------
