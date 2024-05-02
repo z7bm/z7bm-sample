@@ -80,7 +80,7 @@ optnames = []
 envx = Environment() #( tools = {} )
 
 envx['BUILD_VARIANT']   = variant
-envx['PROJECT_OPTIONS'] = process_prjopt(envx, optnames)
+envx['PROJECT_OPTIONS'] = process_prjopt(optnames)
 
 set_comstr(envx)
 

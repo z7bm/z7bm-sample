@@ -12,7 +12,7 @@ import time
 from utils import *
 
 #-------------------------------------------------------------------------------
-def process_prjopt(env, optnames):
+def process_prjopt(optnames):
 
     options = {}
     

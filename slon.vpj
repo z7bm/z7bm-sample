@@ -74,6 +74,8 @@
         </Menu>
     </Config>
     <CustomFolders></CustomFolders>
+    <List Name="RTE">
+    </List>
     <Files AutoFolders="DirectoryView">
         <F
             N="*"
@@ -81,6 +83,4 @@
             Excludes=""
             L="1"/>
     </Files>
-    <List Name="RTE">
-    </List>
 </Project>
