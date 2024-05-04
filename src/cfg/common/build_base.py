@@ -102,6 +102,8 @@ class BuildBase:
         self.envx['QUESTASIM']                 = env.QUESTASIM
         self.envx['VENDOR_LIB_PATH']           = env.VENDOR_LIB_PATH
         self.envx['UVM_PATH']                  = os.path.join(env.QUESTABASE, 'uvm-1.2')
+        
+        self.envx['ARM_NONE_EABI']             = env.ARM_NONE_EABI
 
         self.envx.Tool('vivado')
         self.envx.Tool('questa')
