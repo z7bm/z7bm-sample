@@ -48,6 +48,7 @@ def colorize(s, color):
 #-------------------------------------------------------------------------------
 def set_comstr(env):
     env['ASCOMSTR']      = colorize('%s : $SOURCE' % COMSTR['as'],    'white'  )
+    env['ASPPCOMSTR']    = colorize('%s : $SOURCE' % COMSTR['as'],    'white'  )
     env['CCCOMSTR']      = colorize('%s : $SOURCE' % COMSTR['cc'],    'white'  ) 
     env['CXXCOMSTR']     = colorize('%s : $SOURCE' % COMSTR['cxx'],   'white'  ) 
     env['LINKCOMSTR']    = colorize("%s : $TARGET" % COMSTR['link'],  'green'  )
