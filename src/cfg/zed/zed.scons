@@ -28,6 +28,25 @@ class BuildZed(BuildMain):
     def __init__(self, **src_dict):
         super().__init__(**src_dict)
 
+        self.add_apu_target()
+
+    def add_apu_target(self):
+
+        envx = self.envx
+        VivadoProject = self.VivadoProject
+        self.bl = SConscript(os.path.join(self.dirs.COMMON, 'sw', 'apu', 'apu.scons'), exports = ['envx', 'VivadoProject'])
+        #self.bl = SConscript(os.path.join(self.dirs.COMMON, 'sw', 'apu', 'apu.scons'), variant_dir=envx['DIRS'].BUILD + '/sw/apu/bl' , exports = 'envx')
+
+        self.envx.Alias('apu', self.bl)
+
+        Help("""
+            Software Targets
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                apu : build APU programs
+            """)
+
+
+
 bv = BuildZed(env     = envx,
               src_syn = 'src_syn.yml',
               src_sim = 'src_sim.yml',

@@ -1,0 +1,146 @@
+#-------------------------------------------------------------------------------
+#
+#    Variant construction script for Zynq-7000 APU bare-metal mode
+#
+#    Author: Harry E. Zhurov
+#
+#-------------------------------------------------------------------------------
+
+import os
+
+from pathlib       import Path
+from datetime      import datetime
+from arm_none_eabi import setup_default_env
+
+#-------------------------------------------------------------------------------
+#
+#    Utility Functions
+#
+def make_objects(env, src, src_base, dst_base, ext = 'o'):
+    obj = []
+    for s in src:
+        o = s.replace(src_base, dst_base)
+        o = drop_suffix(o) + '.' + ext
+        obj.append(env.Object(o, s)[0])
+
+    return obj
+
+#-------------------------------------------------------------------------------
+#
+#    Main Build Stuff
+#
+Import(['envx', 'VivadoProject'])
+
+dirs = envx['DIRS']
+
+add_search_path( str( Path(dirs.COMMON) / 'sw' / 'apu' / 'env' ) )
+
+build_root = Path(dirs.BUILD)
+
+#---------------------------------------------------------------------
+#
+#    Libraries
+#
+src_embio           = read_sources('src_embio.yml')
+src_xil             = read_sources('src_xil.yml')
+src_z7lib           = read_sources('src_z7lib.yml')
+
+src_embio_base_path = Path(src_embio[0]).parent
+src_xil_base_path   = Path(src_xil[0]).parent
+src_z7lib_base_path = Path(src_z7lib[0]).parent
+
+lib_build_path      = build_root / 'sw' / 'apu' / 'lib'
+
+embio_obj_path      = lib_build_path / 'obj' / 'embio'
+xil_obj_path        = lib_build_path / 'obj' / 'xil'
+z7lib_obj_path      = lib_build_path / 'obj' / 'z7lib'
+
+
+#---------------------------------------------------------------------
+#
+#    Bootloader Settings
+#
+src_bl            = read_sources('src_apu_bl.yml')
+src_gen           = [str(build_root / 'src' / 'ps7_init.c')]
+
+src_bl_base_path  = Path(src_bl[0]).parent
+src_gen_base_path = Path(src_gen[0]).parent
+bl_build_path     = build_root / 'sw' / 'apu' / 'bl'
+obj_path_bl       = bl_build_path / 'obj'
+
+Depends(src_bl,  VivadoProject)
+Depends(src_gen, VivadoProject)
+
+#---------------------------------------------------------------------
+#
+#    Tool Options
+#
+
+CPU          = 'cortex-a9'
+
+Optimization ='-O2'
+DebugLevel   ='-g3'          # empty to disable debug info
+
+BUILD_DATE = datetime.now().strftime('%Y-%m-%d')
+BUILD_TIME = datetime.now().strftime('%H:%M:%S')
+
+setup_default_env(envx)
+
+FLAGS = []
+FLAGS.append('-mcpu=' + CPU)
+FLAGS.append('-mtune=cortex-a9')
+FLAGS.append('-mfloat-abi=hard')
+FLAGS.append('-mfpu=vfpv3')
+FLAGS.append(Optimization)
+FLAGS.append(DebugLevel)
+
+LFLAGS = FLAGS.copy()
+LFLAGS.append('-T{}'.format( str( Path(envx['DIRS'].COMMON) /'sw' / 'apu' / 'fsbl.ld' ) ) )
+
+envx.Prepend(ASFLAGS   = FLAGS)
+envx.Prepend(CFLAGS    = FLAGS)
+envx.Prepend(CXXFLAGS  = FLAGS)
+envx.Prepend(LINKFLAGS = LFLAGS)
+
+envx.Append(CPPPATH = ['#lib/ps7mmr/const',
+                       '#lib/z7lib',
+                       '#lib/xil',
+                       '#src/sw/apu',
+                       str(build_root / 'src')])
+
+envx.Append(LIBPATH = lib_build_path)
+envx.Append(LIBS = ['embio', 'xil', 'z7lib'])
+
+#---------------------------------------------------------------------
+#
+#    Build Targets
+#
+obj_embio = make_objects(envx, src_embio, str(src_embio_base_path), str(embio_obj_path))
+obj_xil   = make_objects(envx, src_xil,   str(src_xil_base_path),   str(xil_obj_path))
+obj_z7lib = make_objects(envx, src_z7lib, str(src_z7lib_base_path), str(z7lib_obj_path))
+
+libembio = envx.StaticLibrary(str(lib_build_path / 'embio'), obj_embio)
+libxil   = envx.StaticLibrary(str(lib_build_path / 'xil'),   obj_xil)
+libz7lib = envx.StaticLibrary(str(lib_build_path / 'z7lib'), obj_z7lib)
+
+#-----------------------------------------------------------
+#
+#    Bootloader
+#
+#for s in src_bl:
+#    print(s)
+#
+#print()
+
+obj  = make_objects(envx, src_bl,  str(src_bl_base_path),  str(obj_path_bl))
+obj += make_objects(envx, src_gen, str(src_gen_base_path), str(obj_path_bl))
+
+#for o in obj:
+#    print(str(o))
+
+res = envx.Program(str(bl_build_path / 'bl'), obj)
+
+Return('res')
+
+#-------------------------------------------------------------------------------
+

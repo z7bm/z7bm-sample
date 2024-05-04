@@ -65,6 +65,7 @@ class BuildBase:
 
         dirs = import_config('dirpath.yml')
         self.dirs = dirs
+        self.envx['DIRS'] = dirs
         self.envx['EXT_SCRIPT_PATH'] = dirs.SCRIPT_COMMON
 
         # path
