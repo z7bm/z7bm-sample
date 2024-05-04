@@ -17,7 +17,15 @@ sys.path.append( '.scons_ext' )
 sys.path.append( 'src/cfg/common' )
 
 from bslib   import process_prjopt
-from helpers import set_comstr
+#from helpers import set_comstr
+import helpers as hlp
+
+#-------------------------------------------------------------------------------
+#
+#     Add user-defined options
+#
+AddOption('--verbose', action='store_true',  help='print full command lines of launched tools')
+
 
 #-------------------------------------------------------------------------------
 #
@@ -82,7 +90,8 @@ envx = Environment() #( tools = {} )
 envx['BUILD_VARIANT']   = variant
 envx['PROJECT_OPTIONS'] = process_prjopt(optnames)
 
-set_comstr(envx)
+if GetOption('verbose') == None:
+    hlp.set_comstr(envx)
 
 #SConscript(variant_path, exports='envx', variant_dir = '#build/' + variant_name, duplicate = 0)
 SConscript(variant_path, exports='envx')
