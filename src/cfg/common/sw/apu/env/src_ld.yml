@@ -2,6 +2,6 @@
 
 sources:
 
-    - src/cfg/common/sw/apu/ld/bl.ld.S
+    - src/cfg/common/sw/apu/ld/bld.ld.S
     - src/cfg/common/sw/apu/ld/cam.ld.S
 

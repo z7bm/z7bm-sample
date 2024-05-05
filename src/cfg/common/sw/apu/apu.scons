@@ -80,37 +80,37 @@ build_root = Path(dirs.BUILD)
 #
 #    Libraries
 #
-src_embio           = read_sources('src_embio.yml')
-src_xil             = read_sources('src_xil.yml')
-src_z7lib           = read_sources('src_z7lib.yml')
+src_embio        = read_sources('src_embio.yml')
+src_xil          = read_sources('src_xil.yml')
+src_z7lib        = read_sources('src_z7lib.yml')
 
-lib_build_path      = build_root / 'sw' / 'apu' / 'lib'
+lib_build_path   = build_root / 'sw' / 'apu' / 'lib'
 
-embio_obj_path      = lib_build_path / 'obj' / 'embio'
-xil_obj_path        = lib_build_path / 'obj' / 'xil'
-z7lib_obj_path      = lib_build_path / 'obj' / 'z7lib'
+embio_obj_path   = lib_build_path / 'obj' / 'embio'
+xil_obj_path     = lib_build_path / 'obj' / 'xil'
+z7lib_obj_path   = lib_build_path / 'obj' / 'z7lib'
 
 
 #---------------------------------------------------------------------
 #
 #    Bootloader Settings
 #
-src_bl            = read_sources('src_apu_bl.yml')
-src_gen           = [str(build_root / 'src' / 'ps7_init.c')]
+src_bld          = read_sources('src_apu_bld.yml')
+src_gen          = [str(build_root / 'src' / 'ps7_init.c')]
 
-bl_build_path     = build_root / 'sw' / 'apu' / 'bl'
-bl_obj_path       = bl_build_path / 'obj'
+bld_build_path   = build_root / 'sw' / 'apu' / 'bld'
+bld_obj_path     = bld_build_path / 'obj'
 
-Depends(src_bl,  VivadoProject)
+Depends(src_bld,  VivadoProject)
 Depends(src_gen, VivadoProject)
 
 #---------------------------------------------------------------------
 #
 #    Camera Program Settings
 #
-src_cam           = read_sources('src_apu_cam.yml')
-cam_build_path    = build_root / 'sw' / 'apu' / 'cam'
-cam_obj_path      = cam_build_path / 'obj'
+src_cam          = read_sources('src_apu_cam.yml')
+cam_build_path   = build_root / 'sw' / 'apu' / 'cam'
+cam_obj_path     = cam_build_path / 'obj'
 
 Depends(src_cam,  VivadoProject)
 
@@ -153,10 +153,10 @@ envx.Append(LIBS = ['embio', 'xil', 'z7lib'])
 #
 #    Bootloader-specific Construction Environment
 #
-envbl = envx.Clone()
-envbl.Append (LINKFLAGS = FLAGS.copy())
-retreive_linker_script('bl', envbl)
-envbl.Append(LINKFLAGS = '-T' + envbl['TRG_LINKER_SCRIPT'])
+envbld = envx.Clone()
+envbld.Append (LINKFLAGS = FLAGS.copy())
+retreive_linker_script('bld', envbld)
+envbld.Append(LINKFLAGS = '-T' + envbld['TRG_LINKER_SCRIPT'])
 
 #-----------------------------------------------------------
 #
@@ -187,12 +187,12 @@ libz7lib = envx.StaticLibrary(str(lib_build_path / 'z7lib'), obj_z7lib)
 #
 #    Bootloader
 #
-bl_obj  = make_objects(envx, src_bl,  str(bl_obj_path))
-bl_obj += make_objects(envx, src_gen, str(bl_obj_path))
+bld_obj  = make_objects(envx, src_bld,  str(bld_obj_path))
+bld_obj += make_objects(envx, src_gen, str(bld_obj_path))
 
-bl = envbl.Program(str(bl_build_path / 'bl'), bl_obj)
-envbl.AddPreAction(bl, preprocess_linker_script)
-Depends(bl, envbl['SRC_LINKER_SCRIPT'])
+bld = envbld.Program(str(bld_build_path / 'bld'), bld_obj)
+envbld.AddPreAction(bld, preprocess_linker_script)
+Depends(bld, envbld['SRC_LINKER_SCRIPT'])
 
 #-----------------------------------------------------------
 #
@@ -204,7 +204,7 @@ cam = envx.Program(str(cam_build_path / 'cam'), cam_obj)
 envx.AddPreAction(cam, preprocess_linker_script)
 Depends(cam, envx['SRC_LINKER_SCRIPT'])
 
-Return('bl', 'cam')
+Return('bld', 'cam')
 
 #-------------------------------------------------------------------------------
 
