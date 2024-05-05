@@ -1,0 +1,6 @@
+
+
+sources:
+
+    - src/cfg/common/sw/apu/ld/bl.ld.S
+

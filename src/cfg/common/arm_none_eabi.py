@@ -13,6 +13,7 @@ def setup_default_env(env):
     #
     TOOLKIT_PATH = Path(os.environ['CAD']) / 'gcc' / 'arm-none-eabi' / '13'
 
+    CPP      = TOOLKIT_PATH / 'bin' / 'arm-none-eabi-cpp'
     ASM      = TOOLKIT_PATH / 'bin' / 'arm-none-eabi-as'
     CC       = TOOLKIT_PATH / 'bin' / 'arm-none-eabi-gcc'
     CXX      = TOOLKIT_PATH / 'bin' / 'arm-none-eabi-g++'
@@ -21,6 +22,7 @@ def setup_default_env(env):
     LOADER   = TOOLKIT_PATH / 'bin' / 'arm-none-eabi-ldr'
     SIZE     = TOOLKIT_PATH / 'bin' / 'arm-none-eabi-size'
 
+    env['CPP']  = str(CPP)
     env['AS']   = str(ASM)
     env['CC']   = str(CC)
     env['CXX']  = str(CXX)
