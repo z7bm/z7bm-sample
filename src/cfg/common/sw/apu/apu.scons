@@ -16,10 +16,12 @@ from arm_none_eabi import setup_default_env
 #
 #    Utility Functions
 #
-def make_objects(env, src, src_base, dst_base, ext = 'o'):
+def make_objects(env, src, dst_dir, ext = 'o'):
     obj = []
+    src_base = str( Path(src[0]).parent )
+
     for s in src:
-        o = s.replace(src_base, dst_base)
+        o = s.replace(src_base, dst_dir)
         o = drop_suffix(o) + '.' + ext
         obj.append(env.Object(o, s)[0])
 
@@ -82,10 +84,6 @@ src_embio           = read_sources('src_embio.yml')
 src_xil             = read_sources('src_xil.yml')
 src_z7lib           = read_sources('src_z7lib.yml')
 
-src_embio_base_path = Path(src_embio[0]).parent
-src_xil_base_path   = Path(src_xil[0]).parent
-src_z7lib_base_path = Path(src_z7lib[0]).parent
-
 lib_build_path      = build_root / 'sw' / 'apu' / 'lib'
 
 embio_obj_path      = lib_build_path / 'obj' / 'embio'
@@ -100,8 +98,6 @@ z7lib_obj_path      = lib_build_path / 'obj' / 'z7lib'
 src_bl            = read_sources('src_apu_bl.yml')
 src_gen           = [str(build_root / 'src' / 'ps7_init.c')]
 
-src_bl_base_path  = Path(src_bl[0]).parent
-src_gen_base_path = Path(src_gen[0]).parent
 bl_build_path     = build_root / 'sw' / 'apu' / 'bl'
 bl_obj_path       = bl_build_path / 'obj'
 
@@ -113,7 +109,6 @@ Depends(src_gen, VivadoProject)
 #    Camera Program Settings
 #
 src_cam           = read_sources('src_apu_cam.yml')
-src_cam_base_path = Path(src_cam[0]).parent
 cam_build_path    = build_root / 'sw' / 'apu' / 'cam'
 cam_obj_path      = cam_build_path / 'obj'
 
@@ -180,9 +175,9 @@ envx.Append(LINKFLAGS = '-T' + envx['TRG_LINKER_SCRIPT'])
 #
 #    Libraries
 #
-obj_embio = make_objects(envx, src_embio, str(src_embio_base_path), str(embio_obj_path))
-obj_xil   = make_objects(envx, src_xil,   str(src_xil_base_path),   str(xil_obj_path))
-obj_z7lib = make_objects(envx, src_z7lib, str(src_z7lib_base_path), str(z7lib_obj_path))
+obj_embio = make_objects(envx, src_embio, str(embio_obj_path))
+obj_xil   = make_objects(envx, src_xil,   str(xil_obj_path))
+obj_z7lib = make_objects(envx, src_z7lib, str(z7lib_obj_path))
 
 libembio = envx.StaticLibrary(str(lib_build_path / 'embio'), obj_embio)
 libxil   = envx.StaticLibrary(str(lib_build_path / 'xil'),   obj_xil)
@@ -192,17 +187,8 @@ libz7lib = envx.StaticLibrary(str(lib_build_path / 'z7lib'), obj_z7lib)
 #
 #    Bootloader
 #
-#for s in src_bl:
-#    print(s)
-#
-#print()
-
-bl_obj  = make_objects(envx, src_bl,  str(src_bl_base_path),  str(bl_obj_path))
-bl_obj += make_objects(envx, src_gen, str(src_gen_base_path), str(bl_obj_path))
-
-#for o in obj:
-#    print(str(o))
-
+bl_obj  = make_objects(envx, src_bl,  str(bl_obj_path))
+bl_obj += make_objects(envx, src_gen, str(bl_obj_path))
 
 bl = envbl.Program(str(bl_build_path / 'bl'), bl_obj)
 envbl.AddPreAction(bl, preprocess_linker_script)
@@ -212,21 +198,11 @@ Depends(bl, envbl['SRC_LINKER_SCRIPT'])
 #
 #    Camera Program
 #
-#for s in src_bl:
-#    print(s)
-#
-#print()
-
-cam_obj  = make_objects(envx, src_cam,  str(src_cam_base_path),  str(cam_obj_path))
-
-#for o in obj:
-#    print(str(o))
-
+cam_obj  = make_objects(envx, src_cam,  str(cam_obj_path))
 
 cam = envx.Program(str(cam_build_path / 'cam'), cam_obj)
 envx.AddPreAction(cam, preprocess_linker_script)
 Depends(cam, envx['SRC_LINKER_SCRIPT'])
-
 
 Return('bl', 'cam')
 
