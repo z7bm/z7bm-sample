@@ -34,10 +34,10 @@ class BuildZed(BuildMain):
 
         envx = self.envx
         VivadoProject = self.VivadoProject
-        self.bl = SConscript(os.path.join(self.dirs.COMMON, 'sw', 'apu', 'apu.scons'), exports = ['envx', 'VivadoProject'])
+        self.apu = SConscript(os.path.join(self.dirs.COMMON, 'sw', 'apu', 'apu.scons'), exports = ['envx', 'VivadoProject'])
         #self.bl = SConscript(os.path.join(self.dirs.COMMON, 'sw', 'apu', 'apu.scons'), variant_dir=envx['DIRS'].BUILD + '/sw/apu/bl' , exports = 'envx')
 
-        self.envx.Alias('apu', self.bl)
+        self.envx.Alias('apu', self.apu)
 
         Help("""
             Software Targets

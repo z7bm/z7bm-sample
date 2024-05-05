@@ -53,7 +53,7 @@ def preprocess_linker_script(target, source, env):
 
     cmd = env['CPP'] + ' -P -undef ' + src_script + ' ' + trg_script
 
-    print(cmd)
+    #print(cmd)
 
     rcode, out, err = cexec(cmd)
     out += err
@@ -103,16 +103,26 @@ src_gen           = [str(build_root / 'src' / 'ps7_init.c')]
 src_bl_base_path  = Path(src_bl[0]).parent
 src_gen_base_path = Path(src_gen[0]).parent
 bl_build_path     = build_root / 'sw' / 'apu' / 'bl'
-obj_path_bl       = bl_build_path / 'obj'
+bl_obj_path       = bl_build_path / 'obj'
 
 Depends(src_bl,  VivadoProject)
 Depends(src_gen, VivadoProject)
 
 #---------------------------------------------------------------------
 #
+#    Camera Program Settings
+#
+src_cam           = read_sources('src_apu_cam.yml')
+src_cam_base_path = Path(src_cam[0]).parent
+cam_build_path    = build_root / 'sw' / 'apu' / 'cam'
+cam_obj_path      = cam_build_path / 'obj'
+
+Depends(src_cam,  VivadoProject)
+
+#---------------------------------------------------------------------
+#
 #    Tool Options
 #
-
 CPU          = 'cortex-a9'
 
 Optimization ='-O2'
@@ -138,7 +148,7 @@ envx.Prepend(CXXFLAGS  = FLAGS)
 envx.Append(CPPPATH = ['#lib/ps7mmr/const',
                        '#lib/z7lib',
                        '#lib/xil',
-                       '#src/sw/apu',
+                       '#src/sw/include',
                        str(build_root / 'src')])
 
 envx.Append(LIBPATH = lib_build_path)
@@ -152,6 +162,14 @@ envbl = envx.Clone()
 envbl.Append (LINKFLAGS = FLAGS.copy())
 retreive_linker_script('bl', envbl)
 envbl.Append(LINKFLAGS = '-T' + envbl['TRG_LINKER_SCRIPT'])
+
+#-----------------------------------------------------------
+#
+#    Camera Program Construction Environment
+#
+envx.Append (LINKFLAGS = FLAGS.copy())
+retreive_linker_script('cam', envx)
+envx.Append(LINKFLAGS = '-T' + envx['TRG_LINKER_SCRIPT'])
 
 #---------------------------------------------------------------------
 #
@@ -179,17 +197,38 @@ libz7lib = envx.StaticLibrary(str(lib_build_path / 'z7lib'), obj_z7lib)
 #
 #print()
 
-obj  = make_objects(envx, src_bl,  str(src_bl_base_path),  str(obj_path_bl))
-obj += make_objects(envx, src_gen, str(src_gen_base_path), str(obj_path_bl))
+bl_obj  = make_objects(envx, src_bl,  str(src_bl_base_path),  str(bl_obj_path))
+bl_obj += make_objects(envx, src_gen, str(src_gen_base_path), str(bl_obj_path))
 
 #for o in obj:
 #    print(str(o))
 
 
-res = envbl.Program(str(bl_build_path / 'bl'), obj)
-envbl.AddPreAction(res, preprocess_linker_script)
+bl = envbl.Program(str(bl_build_path / 'bl'), bl_obj)
+envbl.AddPreAction(bl, preprocess_linker_script)
+Depends(bl, envbl['SRC_LINKER_SCRIPT'])
 
-Return('res')
+#-----------------------------------------------------------
+#
+#    Camera Program
+#
+#for s in src_bl:
+#    print(s)
+#
+#print()
+
+cam_obj  = make_objects(envx, src_cam,  str(src_cam_base_path),  str(cam_obj_path))
+
+#for o in obj:
+#    print(str(o))
+
+
+cam = envx.Program(str(cam_build_path / 'cam'), cam_obj)
+envx.AddPreAction(cam, preprocess_linker_script)
+Depends(cam, envx['SRC_LINKER_SCRIPT'])
+
+
+Return('bl', 'cam')
 
 #-------------------------------------------------------------------------------
 
