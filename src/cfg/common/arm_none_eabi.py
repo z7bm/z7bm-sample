@@ -72,14 +72,13 @@ def setup_default_env(env):
     LFLAGS.append('--specs=nano.specs')
     #LFLAGS.append(' -L '   + ObjDir + LibraryPathOptions)
     LFLAGS.append('-nostartfiles')
-    LFLAGS.append('-lm')
-    LFLAGS.append('-lstdc++')
     #-------------------------------------------------------------------------------
 
     env.Append(ASFLAGS   = FLAGS    )
     env.Append(CFLAGS    = CFLAGS   )
     env.Append(CXXFLAGS  = CXXFLAGS )
     env.Append(LINKFLAGS = LFLAGS   )
+    env.Append(LIBS      = ['m', 'stdc++'])
 
 #-------------------------------------------------------------------------------
 
