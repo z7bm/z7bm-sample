@@ -2,7 +2,7 @@
 parameters:
     VARIANT_NAME        : = ARGUMENTS['bv']
     PROJECT_NAME        : = VARIANT_NAME
-    TOP_NAME            : top
+    TOP_NAME            : lwircam
     TESTBENCH_NAME      : top_tb
     DEVICE              : xc7z020iclg484-1l
                         

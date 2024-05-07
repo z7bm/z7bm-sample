@@ -3,5 +3,5 @@
 usedin: sim
 
 sources:
-    - src/sim/top_tb.sv
+    - src/hw/sim/top_tb.sv
 

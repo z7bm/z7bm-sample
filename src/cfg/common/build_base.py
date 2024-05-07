@@ -65,6 +65,7 @@ class BuildBase:
 
         dirs = import_config('dirpath.yml')
         self.dirs = dirs
+        self.envx['DIRS'] = dirs
         self.envx['EXT_SCRIPT_PATH'] = dirs.SCRIPT_COMMON
 
         # path
@@ -102,6 +103,8 @@ class BuildBase:
         self.envx['QUESTASIM']                 = env.QUESTASIM
         self.envx['VENDOR_LIB_PATH']           = env.VENDOR_LIB_PATH
         self.envx['UVM_PATH']                  = os.path.join(env.QUESTABASE, 'uvm-1.2')
+        
+        self.envx['ARM_NONE_EABI']             = env.ARM_NONE_EABI
 
         self.envx.Tool('vivado')
         self.envx.Tool('questa')
@@ -118,7 +121,7 @@ class BuildBase:
         self.envx.Append( SRC_SIM = self.dirs.SRC_SIM)
 
         bslib.process_arguments(self)
-        bslib.process_prjopt(self)
+        bslib.create_prjopt_files(self)
         bslib.set_sv_seed(self)
 
         #----------------------------------------------------------------------

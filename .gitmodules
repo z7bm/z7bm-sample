@@ -1,3 +1,15 @@
 [submodule "site_scons"]
 	path = site_scons
 	url = https://github.com/fpga-lib/site_scons.git
+[submodule "lib/ps7mmr"]
+	path = lib/ps7mmr
+	url = https://github.com/z7bm/ps7mmr.git
+[submodule "lib/z7lib"]
+	path = lib/z7lib
+	url = https://github.com/z7bm/z7lib.git
+[submodule "lib/embio"]
+	path = lib/embio
+	url = https://github.com/emb-lib/io.git
+[submodule "lib/xil"]
+	path = lib/xil
+	url = https://github.com/z7bm/xil.git

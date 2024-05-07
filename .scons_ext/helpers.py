@@ -6,6 +6,10 @@ import os
 import sys
 import psutil
 
+sys.path.append('site_scons')
+
+from utils import *
+
 import SCons 
 
 from cfg import *
@@ -31,30 +35,17 @@ def cxxflags(toolchain):
 def optflags(toolchain, variant):
     return TOOLCHAIN_OPTFLAGS[toolchain][variant]
 #-------------------------------------------------------------------------------
-def colorize(s, color):
-    ESC = '\033['
-    colors = {}
-    colors['black']    = '1;30'
-    colors['red']      = '1;31'
-    colors['green']    = '1;32'
-    colors['yellow']   = '0;33'
-    colors['blue']     = '1;34'
-    colors['magenta']  = '1;35'
-    colors['cyan']     = '1;36'
-    colors['white']    = '1;37'
-
-    return ESC + colors[color] + 'm' + s + ESC + '0m'
-
-#-------------------------------------------------------------------------------
 def set_comstr(env):
-    env['ASCOMSTR']      = colorize('%s : $SOURCE' % COMSTR['as'],    'white'  )
-    env['CCCOMSTR']      = colorize('%s : $SOURCE' % COMSTR['cc'],    'white'  ) 
-    env['CXXCOMSTR']     = colorize('%s : $SOURCE' % COMSTR['cxx'],   'white'  ) 
-    env['LINKCOMSTR']    = colorize("%s : $TARGET" % COMSTR['link'],  'green'  )
-    env['ARCOMSTR']      = colorize('%s : $TARGET' % COMSTR['lib'],   'magenta')
-    env['RANLIBCOMSTR']  = colorize('%s : $TARGET' % COMSTR['ranlib'],'magenta')
-    env['QT5_MOCCOMSTR'] = colorize('%s : $SOURCE' % COMSTR['qt5moc'],'yellow' )  
-    env['QT5_QRCCOMSTR'] = colorize('%s : $SOURCE' % COMSTR['qt5qrc'],'blue'   )  
+    env['ASCOMSTR']      = colorize('%s : $SOURCE' % COMSTR['as'],    'white'         )
+    env['ASPPCOMSTR']    = colorize('%s : $SOURCE' % COMSTR['as'],    'white'         )
+    env['CCCOMSTR']      = colorize('%s : $SOURCE' % COMSTR['cc'],    'white'         )
+    env['CXXCOMSTR']     = colorize('%s : $SOURCE' % COMSTR['cxx'],   'white'         )
+    env['LINKCOMSTR']    = colorize("%s : $TARGET" % COMSTR['link'],  'green',   True )
+    env['ARCOMSTR']      = colorize('%s : $TARGET' % COMSTR['lib'],   'magenta'       )
+    env['RANLIBCOMSTR']  = colorize('%s : $TARGET' % COMSTR['ranlib'],'magenta'       )
+    env['QT5_MOCCOMSTR'] = colorize('%s : $SOURCE' % COMSTR['qt5moc'],'yellow'        )
+    env['QT5_QRCCOMSTR'] = colorize('%s : $SOURCE' % COMSTR['qt5qrc'],'blue'          )
+    
 #-------------------------------------------------------------------------------
 def explicit_moc(env, moc_files):
     RootDir = str(env.Dir('#'))
