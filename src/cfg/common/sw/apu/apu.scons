@@ -35,8 +35,6 @@ def create_listing(target, source, env):
     rcode, out, err = cexec(cmd)
     lst_path = drop_suffix( str(target[0]).replace('/obj/', '/lst/') ) + '.lst'
     lst_dir = Path(lst_path).parent
-    if not lst_dir.exists():
-        Execute(Mkdir(str(lst_dir)))
     with open(lst_path, 'wb') as lst:
         lst.write(out.encode())
 
@@ -101,9 +99,11 @@ src_z7lib        = read_sources('src_z7lib.yml')
 
 lib_build_path   = build_root / 'sw' / 'apu' / 'lib'
 
-embio_obj_path   = lib_build_path / 'obj' / 'embio'
-xil_obj_path     = lib_build_path / 'obj' / 'xil'
-z7lib_obj_path   = lib_build_path / 'obj' / 'z7lib'
+embio_obj_path   = lib_build_path / 'embio' / 'obj'
+xil_obj_path     = lib_build_path / 'xil'   / 'obj'
+z7lib_obj_path   = lib_build_path / 'z7lib' / 'obj'
+
+objdirs = [embio_obj_path, xil_obj_path, z7lib_obj_path]
 
 #---------------------------------------------------------------------
 #
@@ -115,7 +115,9 @@ src_gen          = [str(build_root / 'src' / 'ps7_init.c')]
 bld_build_path   = build_root / 'sw' / 'apu' / 'bld'
 bld_obj_path     = bld_build_path / 'obj'
 
-Depends(src_bld,  VivadoProject)
+objdirs.append(bld_obj_path)
+
+Depends(src_bld, VivadoProject)
 Depends(src_gen, VivadoProject)
 
 #---------------------------------------------------------------------
@@ -126,7 +128,13 @@ src_cam          = read_sources('src_apu_cam.yml')
 cam_build_path   = build_root / 'sw' / 'apu' / 'cam'
 cam_obj_path     = cam_build_path / 'obj'
 
+objdirs.append(cam_obj_path)
+
 Depends(src_cam,  VivadoProject)
+
+lstdirs = [i.parent / 'lst' for i in objdirs]
+
+create_dirs(lstdirs)
 
 #---------------------------------------------------------------------
 #
