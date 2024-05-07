@@ -22,11 +22,12 @@ def setup_default_env(env):
     LOADER   = TOOLKIT_PATH / 'bin' / 'arm-none-eabi-ldr'
     SIZE     = TOOLKIT_PATH / 'bin' / 'arm-none-eabi-size'
 
-    env['CPP']  = str(CPP)
-    env['AS']   = str(ASM)
-    env['CC']   = str(CC)
-    env['CXX']  = str(CXX)
-    env['LINK'] = str(LINKER)
+    env['CPP']     = str(CPP)
+    env['AS']      = str(ASM)
+    env['CC']      = str(CC)
+    env['CXX']     = str(CXX)
+    env['LINK']    = str(LINKER)
+    env['OBJDUMP'] = str(OBJDUMP)
 
     #-------------------------------------------------------------------------------
     #

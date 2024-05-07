@@ -17,15 +17,30 @@ from arm_none_eabi import setup_default_env
 #    Utility Functions
 #
 def make_objects(env, src, dst_dir, ext = 'o'):
-    obj = []
+    obj_list = []
     src_base = str( Path(src[0]).parent )
 
     for s in src:
         o = s.replace(src_base, dst_dir)
         o = drop_suffix(o) + '.' + ext
-        obj.append(env.Object(o, s)[0])
+        obj = env.Object(o, s)[0]
+        env.AddPostAction(obj, create_lst)
+        obj_list.append(obj)
 
-    return obj
+    return obj_list
+
+#---------------------------------------------------------------------
+def create_listing(target, source, env):
+    cmd = env['OBJDUMP'] + ' -dCS ' + str(target[0])
+    rcode, out, err = cexec(cmd)
+    lst_path = drop_suffix( str(target[0]).replace('/obj/', '/lst/') ) + '.lst'
+    lst_dir = Path(lst_path).parent
+    if not lst_dir.exists():
+        Execute(Mkdir(str(lst_dir)))
+    with open(lst_path, 'wb') as lst:
+        lst.write(out.encode())
+
+create_lst = Action(create_listing, None)
 
 #---------------------------------------------------------------------
 def retreive_linker_script(name, env):
@@ -89,7 +104,6 @@ lib_build_path   = build_root / 'sw' / 'apu' / 'lib'
 embio_obj_path   = lib_build_path / 'obj' / 'embio'
 xil_obj_path     = lib_build_path / 'obj' / 'xil'
 z7lib_obj_path   = lib_build_path / 'obj' / 'z7lib'
-
 
 #---------------------------------------------------------------------
 #
@@ -179,9 +193,9 @@ obj_embio = make_objects(envx, src_embio, str(embio_obj_path))
 obj_xil   = make_objects(envx, src_xil,   str(xil_obj_path))
 obj_z7lib = make_objects(envx, src_z7lib, str(z7lib_obj_path))
 
-libembio = envx.StaticLibrary(str(lib_build_path / 'embio'), obj_embio)
-libxil   = envx.StaticLibrary(str(lib_build_path / 'xil'),   obj_xil)
-libz7lib = envx.StaticLibrary(str(lib_build_path / 'z7lib'), obj_z7lib)
+libembio  = envx.StaticLibrary(str(lib_build_path / 'embio'), obj_embio)
+libxil    = envx.StaticLibrary(str(lib_build_path / 'xil'),   obj_xil)
+libz7lib  = envx.StaticLibrary(str(lib_build_path / 'z7lib'), obj_z7lib)
 
 #-----------------------------------------------------------
 #
