@@ -205,7 +205,8 @@ bld_obj  = make_objects(envx, src_bld,  str(bld_obj_path))
 bld_obj += make_objects(envx, src_gen, str(bld_obj_path))
 
 bld = envbld.Program(str(bld_build_path / 'bld'), bld_obj)
-envbld.AddPreAction(bld, preprocess_linker_script)
+bld_cpp_ld = Action(preprocess_linker_script, None)
+envbld.AddPreAction(bld, bld_cpp_ld)
 Depends(bld, envbld['SRC_LINKER_SCRIPT'])
 
 #-----------------------------------------------------------
@@ -215,7 +216,8 @@ Depends(bld, envbld['SRC_LINKER_SCRIPT'])
 cam_obj  = make_objects(envx, src_cam,  str(cam_obj_path))
 
 cam = envx.Program(str(cam_build_path / 'cam'), cam_obj)
-envx.AddPreAction(cam, preprocess_linker_script)
+cam_cpp_ld = Action(preprocess_linker_script, None)
+envx.AddPreAction(cam, cam_cpp_ld)
 Depends(cam, envx['SRC_LINKER_SCRIPT'])
 
 Return('bld', 'cam')
