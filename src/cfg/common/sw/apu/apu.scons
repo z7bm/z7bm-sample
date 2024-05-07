@@ -191,6 +191,9 @@ envx.Append(CPPPATH = ['#lib/ps7mmr/const',
 envx.Append(LIBPATH = lib_build_path)
 envx.Append(LIBS = ['embio', 'xil', 'z7lib'])
 
+map_filename = '${TARGET.dir}' + os.sep + '${TARGET.name}.map'
+envx.Append(LINKFLAGS='-Wl,-Map={},--cref'.format(map_filename))
+
 #-----------------------------------------------------------
 #
 #    Bootloader-specific Construction Environment
