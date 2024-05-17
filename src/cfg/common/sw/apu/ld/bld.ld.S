@@ -30,24 +30,25 @@
 *
 ******************************************************************************/
 
-_STACK_SIZE = DEFINED(_STACK_SIZE) ? _STACK_SIZE : 2048;
-_HEAP_SIZE = DEFINED(_HEAP_SIZE) ? _HEAP_SIZE : 0x2000;
+_STACK_SIZE            = DEFINED(_STACK_SIZE)            ? _STACK_SIZE            : 2048;
+_HEAP_SIZE             = DEFINED(_HEAP_SIZE)             ? _HEAP_SIZE             : 0x2000;
 
-_RSA_AC_SIZE = DEFINED(_RSA_AC_SIZE) ? _RSA_AC_SIZE : 0x1000;
+_RSA_AC_SIZE           = DEFINED(_RSA_AC_SIZE)           ? _RSA_AC_SIZE           : 0x1000;
 
-_ABORT_STACK_SIZE = DEFINED(_ABORT_STACK_SIZE) ? _ABORT_STACK_SIZE : 1024;
+_ABORT_STACK_SIZE      = DEFINED(_ABORT_STACK_SIZE)      ? _ABORT_STACK_SIZE      : 1024;
 _SUPERVISOR_STACK_SIZE = DEFINED(_SUPERVISOR_STACK_SIZE) ? _SUPERVISOR_STACK_SIZE : 2048;
-_FIQ_STACK_SIZE = DEFINED(_FIQ_STACK_SIZE) ? _FIQ_STACK_SIZE : 1024;
-_UNDEF_STACK_SIZE = DEFINED(_UNDEF_STACK_SIZE) ? _UNDEF_STACK_SIZE : 1024;
+_FIQ_STACK_SIZE        = DEFINED(_FIQ_STACK_SIZE)        ? _FIQ_STACK_SIZE        : 1024;
+_UNDEF_STACK_SIZE      = DEFINED(_UNDEF_STACK_SIZE)      ? _UNDEF_STACK_SIZE      : 1024;
 
                                                
 /* Define Memories in the system */
 
 MEMORY
 {
-   ps7_ram_0_S_AXI_BASEADDR : ORIGIN = 0x00000000, LENGTH = 0x00030000
-   ps7_ram_1_S_AXI_BASEADDR : ORIGIN = 0xFFFFd600, LENGTH = 0x00002800
-   DDR                      : ORIGIN = 0x00100000, LENGTH = 0x00010000
+   MEM_SEG0 : ORIGIN = 0x00000000, LENGTH = 0x00030000
+   MEM_SEG1 : ORIGIN = 0xFFFF1000, LENGTH = 0x00005000
+   MEM_SEG2 : ORIGIN = 0xFFFFd600, LENGTH = 0x00002800
+   DDR      : ORIGIN = 0x00100000, LENGTH = 0x00100000
 }
 
 /* Specify the default entry point to the program */
@@ -72,15 +73,23 @@ SECTIONS
        *(.vfp11_veneer)
        *(.ARM.extab)
        *(.gnu.linkonce.armextab.*)
-    } > ps7_ram_0_S_AXI_BASEADDR
+    } > MEM_SEG0
     
+
+    .mmu_tbl (ALIGN(0x4000)): {
+       __mmu_tbl_start = .;
+       *(.mmu_tbl)
+       __mmu_tbl_end = .;
+    } > MEM_SEG0
+
+
     .init : {
        KEEP (*(.init))
-    } > ps7_ram_0_S_AXI_BASEADDR
+    } > MEM_SEG0
     
     .fini : {
        KEEP (*(.fini))
-    } > ps7_ram_0_S_AXI_BASEADDR
+    } > MEM_SEG0
     
     .rodata : {
        __rodata_start = .;
@@ -88,14 +97,14 @@ SECTIONS
        *(.rodata.*)
        *(.gnu.linkonce.r.*)
        __rodata_end = .;
-    } > ps7_ram_0_S_AXI_BASEADDR
+    } > MEM_SEG0
     
     .rodata1 : {
        __rodata1_start = .;
        *(.rodata1)
        *(.rodata1.*)
        __rodata1_end = .;
-    } > ps7_ram_0_S_AXI_BASEADDR
+    } > MEM_SEG0
     
     .sdata2 : {
        __sdata2_start = .;
@@ -103,7 +112,7 @@ SECTIONS
        *(.sdata2.*)
        *(.gnu.linkonce.s2.*)
        __sdata2_end = .;
-    } > ps7_ram_0_S_AXI_BASEADDR
+    } > MEM_SEG0
     
     .sbss2 : {
        __sbss2_start = .;
@@ -111,7 +120,7 @@ SECTIONS
        *(.sbss2.*)
        *(.gnu.linkonce.sb2.*)
        __sbss2_end = .;
-    } > ps7_ram_0_S_AXI_BASEADDR
+    } > MEM_SEG0
     
     .data : {
        __data_start = .;
@@ -122,13 +131,13 @@ SECTIONS
        *(.got)
        *(.got.plt)
        __data_end = .;
-    } > ps7_ram_0_S_AXI_BASEADDR
+    } > MEM_SEG0
     
     .text.align :
     {
         . = ALIGN(8);
         __ddr_src_start = .; // start of initialized data label
-    } > ps7_ram_0_S_AXI_BASEADDR
+    } > MEM_SEG0
                         
     .ddr_code : {
         __ddr_code_start = .;
@@ -138,7 +147,7 @@ SECTIONS
        KEEP ( *loader.o (.text.*) )
         __ddr_code_end = .;
                  
-    } > DDR AT > ps7_ram_0_S_AXI_BASEADDR
+    } > DDR AT > MEM_SEG0
     
     
     .data1 : {
@@ -146,11 +155,11 @@ SECTIONS
        *(.data1)
        *(.data1.*)
        __data1_end = .;
-    } > ps7_ram_0_S_AXI_BASEADDR
+    } > MEM_SEG0
     
     .got : {
        *(.got)
-    } > ps7_ram_0_S_AXI_BASEADDR
+    } > MEM_SEG0
     
     .ctors : {
        __CTOR_LIST__ = .;
@@ -161,7 +170,7 @@ SECTIONS
        KEEP (*(.ctors))
        __CTOR_END__ = .;
        ___CTORS_END___ = .;
-    } > ps7_ram_0_S_AXI_BASEADDR
+    } > MEM_SEG0
     
     .dtors : {
        __DTOR_LIST__ = .;
@@ -172,74 +181,68 @@ SECTIONS
        KEEP (*(.dtors))
        __DTOR_END__ = .;
        ___DTORS_END___ = .;
-    } > ps7_ram_0_S_AXI_BASEADDR
+    } > MEM_SEG0
     
     .fixup : {
        __fixup_start = .;
        *(.fixup)
        __fixup_end = .;
-    } > ps7_ram_0_S_AXI_BASEADDR
+    } > MEM_SEG0
     
     .eh_frame : {
        *(.eh_frame)
-    } > ps7_ram_0_S_AXI_BASEADDR
+    } > MEM_SEG0
     
     .eh_framehdr : {
        __eh_framehdr_start = .;
        *(.eh_framehdr)
        __eh_framehdr_end = .;
-    } > ps7_ram_0_S_AXI_BASEADDR
+    } > MEM_SEG0
     
     .gcc_except_table : {
        *(.gcc_except_table)
-    } > ps7_ram_0_S_AXI_BASEADDR
-    
-    .mmu_tbl (ALIGN(0x4000)): {
-       __mmu_tbl_start = .;
-       *(.mmu_tbl)
-       __mmu_tbl_end = .;
-    } > ps7_ram_0_S_AXI_BASEADDR
-    
+    } > MEM_SEG0
+
     .ARM.exidx : {
        __exidx_start = .;
        *(.ARM.exidx*)
        *(.gnu.linkonce.armexidix.*.*)
        __exidx_end = .;
-    } > ps7_ram_0_S_AXI_BASEADDR
+    } > MEM_SEG0
     
     .preinit_array : {
        __preinit_array_start = .;
        KEEP (*(SORT(.preinit_array.*)))
        KEEP (*(.preinit_array))
        __preinit_array_end = .;
-    } > ps7_ram_0_S_AXI_BASEADDR
+    } > MEM_SEG0
     
     .init_array : {
        __init_array_start = .;
        KEEP (*(SORT(.init_array.*)))
        KEEP (*(.init_array))
        __init_array_end = .;
-    } > ps7_ram_0_S_AXI_BASEADDR
+    } > MEM_SEG0
     
     .fini_array : {
        __fini_array_start = .;
        KEEP (*(SORT(.fini_array.*)))
        KEEP (*(.fini_array))
        __fini_array_end = .;
-    } > ps7_ram_0_S_AXI_BASEADDR
+    } > MEM_SEG0
     
     .rsa_ac : {
         . = ALIGN(64);
         __rsa_ac_start = .;
         . += _RSA_AC_SIZE;
         __rsa_ac_end = .;
-    } > ps7_ram_0_S_AXI_BASEADDR
+    } > MEM_SEG0
     
     .ARM.attributes : {
        __ARM.attributes_start = .;
        *(.ARM.attributes)
        __ARM.attributes_end = .;
-    } > ps7_ram_0_S_AXI_BASEADDR
+    } > MEM_SEG0
     
     .sdata : {
        __sdata_start = .;
@@ -247,7 +250,7 @@ SECTIONS
        *(.sdata.*)
        *(.gnu.linkonce.s.*)
        __sdata_end = .;
-    } > ps7_ram_0_S_AXI_BASEADDR
+    } > MEM_SEG0
     
     .sbss (NOLOAD) : {
        __sbss_start = .;
@@ -255,7 +258,7 @@ SECTIONS
        *(.sbss.*)
        *(.gnu.linkonce.sb.*)
        __sbss_end = .;
-    } > ps7_ram_0_S_AXI_BASEADDR
+    } > MEM_SEG0
     
     .tdata : {
        __tdata_start = .;
@@ -263,7 +266,7 @@ SECTIONS
        *(.tdata.*)
        *(.gnu.linkonce.td.*)
        __tdata_end = .;
-    } > ps7_ram_0_S_AXI_BASEADDR
+    } > MEM_SEG0
     
     .tbss : {
        __tbss_start = .;
@@ -271,7 +274,7 @@ SECTIONS
        *(.tbss.*)
        *(.gnu.linkonce.tb.*)
        __tbss_end = .;
-    } > ps7_ram_0_S_AXI_BASEADDR
+    } > MEM_SEG0
     
     .bss (NOLOAD) : {
        __bss_start = .;
@@ -282,7 +285,7 @@ SECTIONS
        *(COMMON)
        __bss_end = .;
        __bss_end__ = .;
-    } > ps7_ram_0_S_AXI_BASEADDR
+    } > MEM_SEG0
     
     _SDA_BASE_ = __sdata_start + ((__sbss_end - __sdata_start) / 2 );
     
@@ -298,8 +301,8 @@ SECTIONS
        . += _HEAP_SIZE;
        _heap_end = .;
        HeapLimit = .;
-    } > ps7_ram_0_S_AXI_BASEADDR
-    
+    } > MEM_SEG0
+
     .stack (NOLOAD) : {
        . = ALIGN(16);
        _stack_end = .;
@@ -326,7 +329,7 @@ SECTIONS
        . += _UNDEF_STACK_SIZE;
        . = ALIGN(16);
        __undef_stack = .;
-    } > ps7_ram_1_S_AXI_BASEADDR
+    } > MEM_SEG2
     
     _end = .;
 }
