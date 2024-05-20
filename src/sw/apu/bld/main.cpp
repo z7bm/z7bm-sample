@@ -56,8 +56,34 @@ int print(const char *format, ...)
 //------------------------------------------------------------------------------
 int main() 
 { 
-//    ps7_init();
+    ps7_init();
     
+    memcpy((void *)0xffff0000, (void *)0x00004000, 16384);
+    uint32_t ttbr0 = 0xffff005b;
+
+
+    uint32_t tmp;
+    __asm__ __volatile__("mrc p15, 0, %[tmp], c1, c0, 0\n\t"
+                         "bic %[tmp], %[tmp], #0x1\n\t"
+                         "mcr p15, 0, %[tmp], c1, c0, 0\n\t"
+                         : [tmp] "=r" (tmp)
+                         :       "r"  (tmp));
+
+    __asm__ __volatile__("mcr p15, 0, %1, c2, c0, 0"
+                         : "=r" (ttbr0)
+                         : "r"  (ttbr0));
+
+
+    __asm__ __volatile__("mrc p15, 0, %[tmp], c1, c0, 0\n\t"
+                         "orr %[tmp], %[tmp], #0x1\n\t"
+                         "mcr p15, 0, %[tmp], c1, c0, 0\n\t"
+                         "dsb\n\t"
+                         "isb\n\t"
+                         : [tmp] "=r" (tmp)
+                         :       "r"  (tmp));
+
+
+
     //-----------------------------------------------
     // set up output pins
     sbpa(GPIO_DIRM_0_REG, 1ul << 7);
@@ -87,7 +113,7 @@ int main()
         ps7_register_isr_handler(&default_isr_handler, i);
     }
     
-    ps7_register_isr_handler(&swi_isr_handler, PS7IRQ_ID_SW7);
+    ps7_register_isr_handler(&swi_isr_handler,  PS7IRQ_ID_SW7);
     ps7_register_isr_handler(&gpio_isr_handler, PS7IRQ_ID_GPIO);
     
     //-----------------------------------------------
