@@ -44,7 +44,7 @@ class BuildZed(BuildMain):
             cmd = str(xsct) + ' ' + self.dirs.SCRIPT_COMMON + os.sep + 'load.tcl'
             cexec(cmd)
 
-        apu_load = envx.Action(load, colorize('load apu', 'yellow'))
+        apu_load = envx.Action(load, colorize('load apu', 'yellow', True))
         self.apuld = envx.Command('apuld', self.apu, apu_load)
 
         self.envx.Alias('apu',   self.apu)
