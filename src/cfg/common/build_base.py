@@ -98,6 +98,7 @@ class BuildBase:
         self.envx['ENV']['MGLS_LICENSE_FILE']  = env.MGLS_LICENSE_FILE
         self.envx['ENV']['XILINX_VIVADO']      = env.XILINX_VIVADO
         self.envx['XILINX_VIVADO']             = env.XILINX_VIVADO
+        self.envx['XILINX_VITIS']              = env.XILINX_VITIS
         self.envx['XILINX_HLS']                = env.XILINX_HLS
         self.envx['QUESTABIN']                 = env.QUESTABIN
         self.envx['QUESTASIM']                 = env.QUESTASIM

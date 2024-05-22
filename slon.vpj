@@ -71,6 +71,14 @@
                 ClearProcessBuffer="1">
                 <Exec CmdLine="etime.sh scons -s variant=%bn prjopen"/>
             </Target>
+            <Target
+                Name="Load APU"
+                MenuCaption="Load AP&amp;U"
+                RunFromDir="%rw"
+                CaptureOutputWith="ProcessBuffer"
+                SaveOption="SaveAll">
+                <Exec CmdLine="etime.sh scons bv=%bn apuld"/>
+            </Target>
         </Menu>
     </Config>
     <CustomFolders></CustomFolders>
