@@ -6,7 +6,7 @@ MEMORY
    MEM_SEG0 : ORIGIN = 0x00000000, LENGTH = 64k
    MEM_SEG1 : ORIGIN = 0xFFFF1000, LENGTH = 64k
    MEM_SEG2 : ORIGIN = 0xFFFFd600, LENGTH = 64k
-   DDR      : ORIGIN = 0x00100000, LENGTH = 0x00100000
+   DDR      : ORIGIN = 0x00100000, LENGTH = 1M
 }
 
 /* Specify the default entry point to the program */

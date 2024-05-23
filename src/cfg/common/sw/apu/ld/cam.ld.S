@@ -2,8 +2,8 @@
 //------------------------------------------------------------------------------
 MEMORY
 {
-   OCM_CODE : ORIGIN = 0xFFFC0000, LENGTH = 0x00020000
-   OCM_DATA : ORIGIN = 0xFFFE0000, LENGTH = 0x00020000 - 16*1024
+   OCM_CODE : ORIGIN = 0xFFFC0000, LENGTH = 64k*2
+   OCM_DATA : ORIGIN = 0xFFFE0000, LENGTH = 64k*2 - 16k
 }
 
 
