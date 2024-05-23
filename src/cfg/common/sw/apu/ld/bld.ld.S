@@ -1,53 +1,11 @@
-/******************************************************************************
-*
-* Copyright (C) 2012 - 2014 Xilinx, Inc.  All rights reserved.
-* 
-* Permission is hereby granted, free of charge, to any person obtaining a copy
-* of this software and associated documentation files (the "Software"), to deal 
-* in the Software without restriction, including without limitation the rights 
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell  
-* copies of the Software, and to permit persons to whom the Software is 
-* furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included in 
-* all copies or substantial portions of the Software.
-*
-* Use of the Software is limited solely to applications: 
-* (a) running on a Xilinx device, or 
-* (b) that interact with a Xilinx device through a bus or interconnect.  
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
-* XILINX  BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-* WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF 
-* OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
-* SOFTWARE.
-*
-* Except as contained in this notice, the name of the Xilinx shall not be used
-* in advertising or otherwise to promote the sale, use or other dealings in 
-* this Software without prior written authorization from Xilinx.
-*
-******************************************************************************/
-
-_STACK_SIZE            = DEFINED(_STACK_SIZE)            ? _STACK_SIZE            : 2048;
-_HEAP_SIZE             = DEFINED(_HEAP_SIZE)             ? _HEAP_SIZE             : 0x2000;
-
-_RSA_AC_SIZE           = DEFINED(_RSA_AC_SIZE)           ? _RSA_AC_SIZE           : 0x1000;
-
-_ABORT_STACK_SIZE      = DEFINED(_ABORT_STACK_SIZE)      ? _ABORT_STACK_SIZE      : 1024;
-_SUPERVISOR_STACK_SIZE = DEFINED(_SUPERVISOR_STACK_SIZE) ? _SUPERVISOR_STACK_SIZE : 2048;
-_FIQ_STACK_SIZE        = DEFINED(_FIQ_STACK_SIZE)        ? _FIQ_STACK_SIZE        : 1024;
-_UNDEF_STACK_SIZE      = DEFINED(_UNDEF_STACK_SIZE)      ? _UNDEF_STACK_SIZE      : 1024;
 
                                                
-/* Define Memories in the system */
-
+//------------------------------------------------------------------------------
 MEMORY
 {
-   MEM_SEG0 : ORIGIN = 0x00000000, LENGTH = 0x00030000
-   MEM_SEG1 : ORIGIN = 0xFFFF1000, LENGTH = 0x00005000
-   MEM_SEG2 : ORIGIN = 0xFFFFd600, LENGTH = 0x00002800
+   MEM_SEG0 : ORIGIN = 0x00000000, LENGTH = 64k
+   MEM_SEG1 : ORIGIN = 0xFFFF1000, LENGTH = 64k
+   MEM_SEG2 : ORIGIN = 0xFFFFd600, LENGTH = 64k
    DDR      : ORIGIN = 0x00100000, LENGTH = 0x00100000
 }
 
@@ -57,280 +15,235 @@ ENTRY(_vector_table)
 
 SECTIONS
 {
-    .text : {
-       *(.vectors)
-       *(.boot)
-       *(EXCLUDE_FILE (*loader.o *main.o) .text)
-       *(EXCLUDE_FILE (*loader.o *main.o) .text.*)
-     //  *(.text) 
-     //  *(.text.*)
-       *(.gnu.linkonce.t.*)
-       *(.plt)
-       *(.gnu_warning)
-       *(.gcc_execpt_table)
-       *(.glue_7)
-       *(.glue_7t)
-       *(.vfp11_veneer)
-       *(.ARM.extab)
-       *(.gnu.linkonce.armextab.*)
-    } > MEM_SEG0
-    
+.text : {
+   *(.vectors)
+   *(.boot)
+   *(EXCLUDE_FILE (*loader.o *main.o) .text)
+   *(EXCLUDE_FILE (*loader.o *main.o) .text.*)
+ //  *(.text)
+ //  *(.text.*)
+   *(.gnu.linkonce.t.*)
+   *(.plt)
+   *(.gnu_warning)
+   *(.gcc_execpt_table)
+   *(.glue_7)
+   *(.glue_7t)
+   *(.vfp11_veneer)
+   *(.ARM.extab)
+   *(.gnu.linkonce.armextab.*)
+} > MEM_SEG0
+//--------------------------------------------------------------------
+.mmu_tbl (ALIGN(0x4000)): {
+   __mmu_tbl_start = .;
+   *(.mmu_tbl)
+   __mmu_tbl_end = .;
+} > MEM_SEG0
+//--------------------------------------------------------------------
+.init : {
+   KEEP (*(.init))
+} > MEM_SEG0
+//--------------------------------------------------------------------
+.fini : {
+   KEEP (*(.fini))
+} > MEM_SEG0
+//--------------------------------------------------------------------
+.rodata : {
+   __rodata_start = .;
+   *(.rodata)
+   *(.rodata.*)
+   *(.gnu.linkonce.r.*)
+   __rodata_end = .;
+} > MEM_SEG1
+//--------------------------------------------------------------------
+.rodata1 : {
+   __rodata1_start = .;
+   *(.rodata1)
+   *(.rodata1.*)
+   __rodata1_end = .;
+} > MEM_SEG1
+//--------------------------------------------------------------------
+.sdata2 : {
+   __sdata2_start = .;
+   *(.sdata2)
+   *(.sdata2.*)
+   *(.gnu.linkonce.s2.*)
+   __sdata2_end = .;
+} > MEM_SEG1
+//--------------------------------------------------------------------
+.sbss2 : {
+   __sbss2_start = .;
+   *(.sbss2)
+   *(.sbss2.*)
+   *(.gnu.linkonce.sb2.*)
+   __sbss2_end = .;
+} > MEM_SEG1
+//--------------------------------------------------------------------
+.data : {
+   __data_start = .;
+   *(.data)
+   *(.data.*)
+   *(.gnu.linkonce.d.*)
+   *(.jcr)
+   *(.got)
+   *(.got.plt)
+   __data_end = .;
+} > MEM_SEG1
+//--------------------------------------------------------------------
+.text.align :
+{
+    . = ALIGN(8);
+    __ddr_src_start = .; // start of initialized data label
+} > MEM_SEG0
+//--------------------------------------------------------------------
+.ddr_code : {
+    __ddr_code_start = .;
+   KEEP ( *main.o (.text) )
+   KEEP ( *main.o (.text.*) )
+   KEEP ( *loader.o (.text) )
+   KEEP ( *loader.o (.text.*) )
+    __ddr_code_end = .;
 
-    .mmu_tbl (ALIGN(0x4000)): {
-       __mmu_tbl_start = .;
-       *(.mmu_tbl)
-       __mmu_tbl_end = .;
-    } > MEM_SEG0
+} > DDR AT > MEM_SEG0
+//--------------------------------------------------------------------
+.data1 : {
+   __data1_start = .;
+   *(.data1)
+   *(.data1.*)
+   __data1_end = .;
+} > MEM_SEG1
+//--------------------------------------------------------------------
+//.got : {
+//   *(.got)
+//} > MEM_SEG0
+//--------------------------------------------------------------------
+.ctors : {
+   __CTOR_LIST__ = .;
+   ___CTORS_LIST___ = .;
+   KEEP (*crtbegin.o(.ctors))
+   KEEP (*(EXCLUDE_FILE(*crtend.o) .ctors))
+   KEEP (*(SORT(.ctors.*)))
+   KEEP (*(.ctors))
+   __CTOR_END__ = .;
+   ___CTORS_END___ = .;
+} > MEM_SEG0
+//--------------------------------------------------------------------
+.dtors : {
+   __DTOR_LIST__ = .;
+   ___DTORS_LIST___ = .;
+   KEEP (*crtbegin.o(.dtors))
+   KEEP (*(EXCLUDE_FILE(*crtend.o) .dtors))
+   KEEP (*(SORT(.dtors.*)))
+   KEEP (*(.dtors))
+   __DTOR_END__ = .;
+   ___DTORS_END___ = .;
+} > MEM_SEG0
+//--------------------------------------------------------------------
+.init_array : {
+   __init_array_start = .;
+   KEEP (*(SORT(.init_array.*)))
+   KEEP (*(.init_array))
+   __init_array_end = .;
+} > MEM_SEG0
+//--------------------------------------------------------------------
+.fini_array : {
+   __fini_array_start = .;
+   KEEP (*(SORT(.fini_array.*)))
+   KEEP (*(.fini_array))
+   __fini_array_end = .;
+} > MEM_SEG0
+//--------------------------------------------------------------------
+.ARM.attributes : {
+   __ARM.attributes_start = .;
+   *(.ARM.attributes)
+   __ARM.attributes_end = .;
+} > MEM_SEG0
+//--------------------------------------------------------------------
+.sdata : {
+   __sdata_start = .;
+   *(.sdata)
+   *(.sdata.*)
+   *(.gnu.linkonce.s.*)
+   __sdata_end = .;
+} > MEM_SEG1
+//--------------------------------------------------------------------
+.sbss (NOLOAD) : {
+   __sbss_start = .;
+   *(.sbss)
+   *(.sbss.*)
+   *(.gnu.linkonce.sb.*)
+   __sbss_end = .;
+} > MEM_SEG1
+//--------------------------------------------------------------------
+.tdata : {
+   __tdata_start = .;
+   *(.tdata)
+   *(.tdata.*)
+   *(.gnu.linkonce.td.*)
+   __tdata_end = .;
+} > MEM_SEG1
+//--------------------------------------------------------------------
+.tbss : {
+   __tbss_start = .;
+   *(.tbss)
+   *(.tbss.*)
+   *(.gnu.linkonce.tb.*)
+   __tbss_end = .;
+} > MEM_SEG1
+//--------------------------------------------------------------------
+.bss (NOLOAD) : {
+   __bss_start = .;
+   __bss_start__ = .;
+   *(.bss)
+   *(.bss.*)
+   *(.gnu.linkonce.b.*)
+   *(COMMON)
+   __bss_end = .;
+   __bss_end__ = .;
+} > MEM_SEG1
+//--------------------------------------------------------------------
+_SDA_BASE_ = __sdata_start + ((__sbss_end - __sdata_start) / 2 );
 
+_SDA2_BASE_ = __sdata2_start + ((__sbss2_end - __sdata2_start) / 2 );
+//--------------------------------------------------------------------
+.heap (NOLOAD) : {
+   . = ALIGN(16);
+   _heap = .;
+   HeapBase = .;
+   _heap_start = .;
+   . += HEAP_SIZE;
+   _heap_end = .;
+   HeapLimit = .;
+} > MEM_SEG1
+//--------------------------------------------------------------------
+.stack (NOLOAD) : {
+   . = ALIGN(16);
+   _stack_end = .;
+   . += MAIN_STACK_SIZE;
+   _stack = .;
+   __stack = _stack;
+   . = ALIGN(16);
+   _irq_stack_end = .;
+   . += IRQ_STACK_SIZE;
+   __irq_stack = .;
+   _supervisor_stack_end = .;
+   . += SUPERVISOR_STACK_SIZE;
+   . = ALIGN(16);
+   __supervisor_stack = .;
+   _abort_stack_end = .;
+   . += ABORT_STACK_SIZE;
+   . = ALIGN(16);
+   __abort_stack = .;
+   _fiq_stack_end = .;
+   . += FIQ_STACK_SIZE;
+   . = ALIGN(16);
+   __fiq_stack = .;
+   _undef_stack_end = .;
+   . += UNDEF_STACK_SIZE;
+   . = ALIGN(16);
+   __undef_stack = .;
+} > MEM_SEG2
 
-    .init : {
-       KEEP (*(.init))
-    } > MEM_SEG0
-    
-    .fini : {
-       KEEP (*(.fini))
-    } > MEM_SEG0
-    
-    .rodata : {
-       __rodata_start = .;
-       *(.rodata)
-       *(.rodata.*)
-       *(.gnu.linkonce.r.*)
-       __rodata_end = .;
-    } > MEM_SEG0
-    
-    .rodata1 : {
-       __rodata1_start = .;
-       *(.rodata1)
-       *(.rodata1.*)
-       __rodata1_end = .;
-    } > MEM_SEG0
-    
-    .sdata2 : {
-       __sdata2_start = .;
-       *(.sdata2)
-       *(.sdata2.*)
-       *(.gnu.linkonce.s2.*)
-       __sdata2_end = .;
-    } > MEM_SEG0
-    
-    .sbss2 : {
-       __sbss2_start = .;
-       *(.sbss2)
-       *(.sbss2.*)
-       *(.gnu.linkonce.sb2.*)
-       __sbss2_end = .;
-    } > MEM_SEG0
-    
-    .data : {
-       __data_start = .;
-       *(.data)
-       *(.data.*)
-       *(.gnu.linkonce.d.*)
-       *(.jcr)
-       *(.got)
-       *(.got.plt)
-       __data_end = .;
-    } > MEM_SEG0
-    
-    .text.align :
-    {
-        . = ALIGN(8);
-        __ddr_src_start = .; // start of initialized data label
-    } > MEM_SEG0
-                        
-    .ddr_code : {
-        __ddr_code_start = .;
-       KEEP ( *main.o (.text) )
-       KEEP ( *main.o (.text.*) )
-       KEEP ( *loader.o (.text) )
-       KEEP ( *loader.o (.text.*) )
-        __ddr_code_end = .;
-                 
-    } > DDR AT > MEM_SEG0
-    
-    
-    .data1 : {
-       __data1_start = .;
-       *(.data1)
-       *(.data1.*)
-       __data1_end = .;
-    } > MEM_SEG0
-    
-    .got : {
-       *(.got)
-    } > MEM_SEG0
-    
-    .ctors : {
-       __CTOR_LIST__ = .;
-       ___CTORS_LIST___ = .;
-       KEEP (*crtbegin.o(.ctors))
-       KEEP (*(EXCLUDE_FILE(*crtend.o) .ctors))
-       KEEP (*(SORT(.ctors.*)))
-       KEEP (*(.ctors))
-       __CTOR_END__ = .;
-       ___CTORS_END___ = .;
-    } > MEM_SEG0
-    
-    .dtors : {
-       __DTOR_LIST__ = .;
-       ___DTORS_LIST___ = .;
-       KEEP (*crtbegin.o(.dtors))
-       KEEP (*(EXCLUDE_FILE(*crtend.o) .dtors))
-       KEEP (*(SORT(.dtors.*)))
-       KEEP (*(.dtors))
-       __DTOR_END__ = .;
-       ___DTORS_END___ = .;
-    } > MEM_SEG0
-    
-    .fixup : {
-       __fixup_start = .;
-       *(.fixup)
-       __fixup_end = .;
-    } > MEM_SEG0
-    
-    .eh_frame : {
-       *(.eh_frame)
-    } > MEM_SEG0
-    
-    .eh_framehdr : {
-       __eh_framehdr_start = .;
-       *(.eh_framehdr)
-       __eh_framehdr_end = .;
-    } > MEM_SEG0
-    
-    .gcc_except_table : {
-       *(.gcc_except_table)
-    } > MEM_SEG0
-
-    .ARM.exidx : {
-       __exidx_start = .;
-       *(.ARM.exidx*)
-       *(.gnu.linkonce.armexidix.*.*)
-       __exidx_end = .;
-    } > MEM_SEG0
-    
-    .preinit_array : {
-       __preinit_array_start = .;
-       KEEP (*(SORT(.preinit_array.*)))
-       KEEP (*(.preinit_array))
-       __preinit_array_end = .;
-    } > MEM_SEG0
-    
-    .init_array : {
-       __init_array_start = .;
-       KEEP (*(SORT(.init_array.*)))
-       KEEP (*(.init_array))
-       __init_array_end = .;
-    } > MEM_SEG0
-    
-    .fini_array : {
-       __fini_array_start = .;
-       KEEP (*(SORT(.fini_array.*)))
-       KEEP (*(.fini_array))
-       __fini_array_end = .;
-    } > MEM_SEG0
-    
-    .rsa_ac : {
-        . = ALIGN(64);
-        __rsa_ac_start = .;
-        . += _RSA_AC_SIZE;
-        __rsa_ac_end = .;
-    } > MEM_SEG0
-    
-    .ARM.attributes : {
-       __ARM.attributes_start = .;
-       *(.ARM.attributes)
-       __ARM.attributes_end = .;
-    } > MEM_SEG0
-    
-    .sdata : {
-       __sdata_start = .;
-       *(.sdata)
-       *(.sdata.*)
-       *(.gnu.linkonce.s.*)
-       __sdata_end = .;
-    } > MEM_SEG0
-    
-    .sbss (NOLOAD) : {
-       __sbss_start = .;
-       *(.sbss)
-       *(.sbss.*)
-       *(.gnu.linkonce.sb.*)
-       __sbss_end = .;
-    } > MEM_SEG0
-    
-    .tdata : {
-       __tdata_start = .;
-       *(.tdata)
-       *(.tdata.*)
-       *(.gnu.linkonce.td.*)
-       __tdata_end = .;
-    } > MEM_SEG0
-    
-    .tbss : {
-       __tbss_start = .;
-       *(.tbss)
-       *(.tbss.*)
-       *(.gnu.linkonce.tb.*)
-       __tbss_end = .;
-    } > MEM_SEG0
-    
-    .bss (NOLOAD) : {
-       __bss_start = .;
-       __bss_start__ = .;
-       *(.bss)
-       *(.bss.*)
-       *(.gnu.linkonce.b.*)
-       *(COMMON)
-       __bss_end = .;
-       __bss_end__ = .;
-    } > MEM_SEG0
-    
-    _SDA_BASE_ = __sdata_start + ((__sbss_end - __sdata_start) / 2 );
-    
-    _SDA2_BASE_ = __sdata2_start + ((__sbss2_end - __sdata2_start) / 2 );
-    
-    /* Generate Stack and Heap definitions */
-    
-    .heap (NOLOAD) : {
-       . = ALIGN(16);
-       _heap = .;
-       HeapBase = .;
-       _heap_start = .;
-       . += _HEAP_SIZE;
-       _heap_end = .;
-       HeapLimit = .;
-    } > MEM_SEG0
-
-    .stack (NOLOAD) : {
-       . = ALIGN(16);
-       _stack_end = .;
-       . += _STACK_SIZE;
-       _stack = .;
-       __stack = _stack;
-       . = ALIGN(16);
-       _irq_stack_end = .;
-       . += _STACK_SIZE;
-       __irq_stack = .;
-       _supervisor_stack_end = .;
-       . += _SUPERVISOR_STACK_SIZE;
-       . = ALIGN(16);
-       __supervisor_stack = .;
-       _abort_stack_end = .;
-       . += _ABORT_STACK_SIZE;
-       . = ALIGN(16);
-       __abort_stack = .;
-       _fiq_stack_end = .;
-       . += _FIQ_STACK_SIZE;
-       . = ALIGN(16);
-       __fiq_stack = .;
-       _undef_stack_end = .;
-       . += _UNDEF_STACK_SIZE;
-       . = ALIGN(16);
-       __undef_stack = .;
-    } > MEM_SEG2
-    
-    _end = .;
+_end = .;
 }
+//------------------------------------------------------------------------------
 

@@ -70,9 +70,7 @@ def preprocess_linker_script(target, source, env):
     src_script = env['SRC_LINKER_SCRIPT']
     trg_script = env['TRG_LINKER_SCRIPT']
 
-    cmd = env['CPP'] + ' -P -undef ' + src_script + ' ' + trg_script
-
-    #print(cmd)
+    cmd = '{} -P -udnef -I{} {} {}'.format(env['CPP'],  env['BUILD_SRC_PATH'], src_script, trg_script)
 
     rcode, out, err = cexec(cmd)
     out += err
@@ -193,6 +191,16 @@ envx.Append(LIBS = ['embio', 'xil', 'z7lib'])
 
 map_filename = '${TARGET.dir}' + os.sep + '${TARGET.name}.map'
 envx.Append(LINKFLAGS='-Wl,-Map={},--cref'.format(map_filename))
+
+#-----------------------------------------------------------
+#
+#    Add command-line macros
+#
+apu_params = read_config('apu_params.yml')
+
+for p in apu_params:
+    envx.Append(CPPDEFINES = '{}={}'.format(p, apu_params[p]))
+    envx.Append(LINKFLAGS = '-Wl,"--defsym={}={}"'.format(p, apu_params[p]))
 
 #-----------------------------------------------------------
 #

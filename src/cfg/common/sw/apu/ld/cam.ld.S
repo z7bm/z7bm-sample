@@ -1,71 +1,22 @@
-/******************************************************************************
-*
-* Copyright (C) 2012 - 2014 Xilinx, Inc.  All rights reserved.
-* 
-* Permission is hereby granted, free of charge, to any person obtaining a copy
-* of this software and associated documentation files (the "Software"), to deal 
-* in the Software without restriction, including without limitation the rights 
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell  
-* copies of the Software, and to permit persons to whom the Software is 
-* furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included in 
-* all copies or substantial portions of the Software.
-*
-* Use of the Software is limited solely to applications: 
-* (a) running on a Xilinx device, or 
-* (b) that interact with a Xilinx device through a bus or interconnect.  
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
-* XILINX  BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-* WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF 
-* OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
-* SOFTWARE.
-*
-* Except as contained in this notice, the name of the Xilinx shall not be used
-* in advertising or otherwise to promote the sale, use or other dealings in 
-* this Software without prior written authorization from Xilinx.
-*
-******************************************************************************/
 
-_STACK_SIZE = DEFINED(_STACK_SIZE) ? _STACK_SIZE : 4096;
-//_HEAP_SIZE = DEFINED(_HEAP_SIZE) ? _HEAP_SIZE : 0x2000;
-
-//_RSA_AC_SIZE = DEFINED(_RSA_AC_SIZE) ? _RSA_AC_SIZE : 0x1000;
-
-_ABORT_STACK_SIZE      = DEFINED(_ABORT_STACK_SIZE)      ? _ABORT_STACK_SIZE :      1024;
-_SUPERVISOR_STACK_SIZE = DEFINED(_SUPERVISOR_STACK_SIZE) ? _SUPERVISOR_STACK_SIZE : 2048;
-_IRQ_STACK_SIZE        = DEFINED(_IRQ_STACK_SIZE)        ? _IRQ_STACK_SIZE :        2048;
-_FIQ_STACK_SIZE        = DEFINED(_FIQ_STACK_SIZE)        ? _FIQ_STACK_SIZE :        1024;
-_UNDEF_STACK_SIZE      = DEFINED(_UNDEF_STACK_SIZE)      ? _UNDEF_STACK_SIZE :      1024;
-
-/* Define Memories in the system */
-
+//------------------------------------------------------------------------------
 MEMORY
 {
    OCM_CODE : ORIGIN = 0xFFFC0000, LENGTH = 0x00020000
-   OCM_DATA : ORIGIN = 0xFFFE0000, LENGTH = 0x00020000
-   //ps7_ram_0_S_AXI_BASEADDR : ORIGIN = 0x00000000, LENGTH = 0x00030000
-   //ps7_ram_1_S_AXI_BASEADDR : ORIGIN = 0xFFFF0000, LENGTH = 0x0000FE00
+   OCM_DATA : ORIGIN = 0xFFFE0000, LENGTH = 0x00020000 - 16*1024
 }
 
-/* Specify the default entry point to the program */
 
 ENTRY(__vector_table)
 
 SECTIONS
 {
-// .mmu_tbl (ALIGN(0x4000)): {
-.mmu_tbl : {
-   __mmu_tbl_start = .;
-   KEEP (*(.mmu_tbl))
-   __mmu_tbl_end = .;
-} > OCM_DATA
-
+//--------------------------------------------------------------------
 .text : {
-   *(.vectors)
+   __vectors_start = .;
+   KEEP(*(.vectors))
+   __vectors_end   = .;
+   *(.exhandlers)
    *(.text)
    *(.text.*)
    *(.gnu.linkonce.t.*)
@@ -78,15 +29,15 @@ SECTIONS
    *(.ARM.extab)
    *(.gnu.linkonce.armextab.*)
 } > OCM_CODE
-
+//--------------------------------------------------------------------
 .init : {
    KEEP (*(.init))
 } > OCM_CODE
-
+//--------------------------------------------------------------------
 .fini : {
    KEEP (*(.fini))
 } > OCM_CODE
-
+//--------------------------------------------------------------------
 .rodata : {
    __rodata_start = .;
    *(.rodata)
@@ -94,14 +45,14 @@ SECTIONS
    *(.gnu.linkonce.r.*)
    __rodata_end = .;
 } > OCM_DATA
-
+//--------------------------------------------------------------------
 .rodata1 : {
    __rodata1_start = .;
    *(.rodata1)
    *(.rodata1.*)
    __rodata1_end = .;
 } > OCM_DATA
-
+//--------------------------------------------------------------------
 .sdata2 : {
    __sdata2_start = .;
    *(.sdata2)
@@ -109,7 +60,7 @@ SECTIONS
    *(.gnu.linkonce.s2.*)
    __sdata2_end = .;
 } > OCM_DATA
-
+//--------------------------------------------------------------------
 .sbss2 : {
    __sbss2_start = .;
    *(.sbss2)
@@ -117,7 +68,7 @@ SECTIONS
    *(.gnu.linkonce.sb2.*)
    __sbss2_end = .;
 } > OCM_DATA
-
+//--------------------------------------------------------------------
 .data : {
    __data_start = .;
    *(.data)
@@ -128,24 +79,14 @@ SECTIONS
    *(.got.plt)
    __data_end = .;
 } > OCM_DATA
-
-//.kot : {
-//   //. = ALIGN(4);
-//   *(.kot)
-//   *(.kot.*)
-//} > OCM
-
+//--------------------------------------------------------------------
 .data1 : {
    __data1_start = .;
    *(.data1)
    *(.data1.*)
    __data1_end = .;
 } > OCM_DATA
-
-//.got : {
-//   *(.got)
-//} > OCM_DATA
-
+//--------------------------------------------------------------------
 .ctors : {
    __CTOR_LIST__ = .;
    ___CTORS_LIST___ = .;
@@ -156,7 +97,7 @@ SECTIONS
    __CTOR_END__ = .;
    ___CTORS_END___ = .;
 } > OCM_CODE
-
+//--------------------------------------------------------------------
 .dtors : {
    __DTOR_LIST__ = .;
    ___DTORS_LIST___ = .;
@@ -167,68 +108,27 @@ SECTIONS
    __DTOR_END__ = .;
    ___DTORS_END___ = .;
 } > OCM_CODE
-
-//.fixup : {
-//   __fixup_start = .;
-//   *(.fixup)
-//   __fixup_end = .;
-//} > OCM
-
-//.eh_frame : {
-//   *(.eh_frame)
-//} > OCM
-//
-//.eh_framehdr : {
-//   __eh_framehdr_start = .;
-//   *(.eh_framehdr)
-//   __eh_framehdr_end = .;
-//} > OCM
-//
-//.gcc_except_table : {
-//   *(.gcc_except_table)
-//} > OCM
-
-//.ARM.exidx : {
-//   __exidx_start = .;
-//   *(.ARM.exidx*)
-//   *(.gnu.linkonce.armexidix.*.*)
-//   __exidx_end = .;
-//} > OCM
-
-//.preinit_array : {
-//   __preinit_array_start = .;
-//   KEEP (*(SORT(.preinit_array.*)))
-//   KEEP (*(.preinit_array))
-//   __preinit_array_end = .;
-//} > OCM
-
+//--------------------------------------------------------------------
 .init_array : {
    __init_array_start = .;
    KEEP (*(SORT(.init_array.*)))
    KEEP (*(.init_array))
    __init_array_end = .;
 } > OCM_CODE
-
+//--------------------------------------------------------------------
 .fini_array : {
    __fini_array_start = .;
    KEEP (*(SORT(.fini_array.*)))
    KEEP (*(.fini_array))
    __fini_array_end = .;
 } > OCM_CODE
-
-//.rsa_ac : {
-//    . = ALIGN(64);
-//    __rsa_ac_start = .;
-//    . += _RSA_AC_SIZE;
-//    __rsa_ac_end = .;
-//} > OCM
-
+//--------------------------------------------------------------------
 .ARM.attributes : {
    __ARM.attributes_start = .;
    *(.ARM.attributes)
    __ARM.attributes_end = .;
 } > OCM_DATA
-
+//--------------------------------------------------------------------
 .sdata : {
    __sdata_start = .;
    *(.sdata)
@@ -236,7 +136,7 @@ SECTIONS
    *(.gnu.linkonce.s.*)
    __sdata_end = .;
 } > OCM_DATA
-
+//--------------------------------------------------------------------
 .sbss (NOLOAD) : {
    __sbss_start = .;
    *(.sbss)
@@ -244,7 +144,7 @@ SECTIONS
    *(.gnu.linkonce.sb.*)
    __sbss_end = .;
 } > OCM_DATA
-
+//--------------------------------------------------------------------
 .tdata : {
    __tdata_start = .;
    *(.tdata)
@@ -252,7 +152,7 @@ SECTIONS
    *(.gnu.linkonce.td.*)
    __tdata_end = .;
 } > OCM_DATA
-
+//--------------------------------------------------------------------
 .tbss : {
    __tbss_start = .;
    *(.tbss)
@@ -260,7 +160,7 @@ SECTIONS
    *(.gnu.linkonce.tb.*)
    __tbss_end = .;
 } > OCM_DATA
-
+//--------------------------------------------------------------------
 .bss (NOLOAD) : {
    __bss_start = .;
    __bss_start__ = .;
@@ -271,13 +171,12 @@ SECTIONS
    __bss_end = .;
    __bss_end__ = .;
 } > OCM_DATA
-
+//--------------------------------------------------------------------
 _SDA_BASE_ = __sdata_start + ((__sbss_end - __sdata_start) / 2 );
 
 _SDA2_BASE_ = __sdata2_start + ((__sbss2_end - __sdata2_start) / 2 );
 
-/* Generate Stack and Heap definitions */
-
+//--------------------------------------------------------------------
 //.heap (NOLOAD) : {
 //   . = ALIGN(16);
 //   _heap = .;
@@ -288,34 +187,36 @@ _SDA2_BASE_ = __sdata2_start + ((__sbss2_end - __sdata2_start) / 2 );
 //   HeapLimit = .;
 //} > OCM
 
+//--------------------------------------------------------------------
 .stack (NOLOAD) : {
    . = ALIGN(16);
    _stack_end = .;
-   . += _STACK_SIZE;
+   . += MAIN_STACK_SIZE;
    _stack = .;
    __stack = _stack;
    . = ALIGN(16);
    _irq_stack_end = .;
-   . += _IRQ_STACK_SIZE;
+   . += IRQ_STACK_SIZE;
    __irq_stack = .;
    _supervisor_stack_end = .;
-   . += _SUPERVISOR_STACK_SIZE;
+   . += SUPERVISOR_STACK_SIZE;
    . = ALIGN(16);
    __supervisor_stack = .;
    _abort_stack_end = .;
-   . += _ABORT_STACK_SIZE;
+   . += ABORT_STACK_SIZE;
    . = ALIGN(16);
    __abort_stack = .;
    _fiq_stack_end = .;
-   . += _FIQ_STACK_SIZE;
+   . += FIQ_STACK_SIZE;
    . = ALIGN(16);
    __fiq_stack = .;
    _undef_stack_end = .;
-   . += _UNDEF_STACK_SIZE;
+   . += UNDEF_STACK_SIZE;
    . = ALIGN(16);
    __undef_stack = .;
 } > OCM_DATA
 
 _end = .;
 }
+//------------------------------------------------------------------------------
 
