@@ -13,6 +13,7 @@ void swi_isr_handler();
 void gpio_isr_handler();
 void default_isr_handler();
 
+void cpy32(uint32_t *const dst, const uint32_t *src, const size_t count);
 
 const uint32_t BUF_SIZE = 4*1024/4;
 
@@ -32,6 +33,7 @@ TQSpi QSpi_ddr(QSpiBuf_ddr);
 const uint32_t UART1_TX_BUF_SIZE = 2048;
 usr::ring_buffer<char, UART1_TX_BUF_SIZE, uint16_t> Uart1_TxBuf;
 TUart Uart1(UART1_ADDR);
+
 
 //------------------------------------------------------------------------------
 #include <stdio.h>
@@ -54,12 +56,10 @@ int print(const char *format, ...)
     return size;
 }
 //------------------------------------------------------------------------------
-int main() 
-{ 
-    ps7_init();
-    
-    memcpy((void *)0xffff0000, (void *)0x00004000, 16384);
-    uint32_t ttbr0 = 0xffff005b;
+void remap_mmu_tt(uintptr_t src, uintptr_t dst)
+{
+    cpy32(reinterpret_cast<uint32_t*>(dst), reinterpret_cast<uint32_t*>(src), 4096);
+    uint32_t ttbr0 = dst | 0x5b;
 
 
     uint32_t tmp;
@@ -73,7 +73,6 @@ int main()
                          : "=r" (ttbr0)
                          : "r"  (ttbr0));
 
-
     __asm__ __volatile__("mrc p15, 0, %[tmp], c1, c0, 0\n\t"
                          "orr %[tmp], %[tmp], #0x1\n\t"
                          "mcr p15, 0, %[tmp], c1, c0, 0\n\t"
@@ -81,8 +80,15 @@ int main()
                          "isb\n\t"
                          : [tmp] "=r" (tmp)
                          :       "r"  (tmp));
-
-
+}
+//------------------------------------------------------------------------------
+int main() 
+{ 
+    //----------------------------------------------------------------
+    //
+    //    relocate MMU translate table
+    //
+    remap_mmu_tt(MMU_TT_INIT_ADDR, MMU_TT_ADDR);
 
     //-----------------------------------------------
     // set up output pins
@@ -149,69 +155,24 @@ int main()
     QSpi_ddr.init();
     Uart1.init();
     
-    //Uart1.send("slonick\n");
-    print("\n*********************\n");
-    print("*********************\n");
+    print("mamont12345678 go to North!\n");
+    print("slon go to North!\n");
     
-    uint32_t slon(uint32_t x);
-    slon(10);
-    slon(5);
-    
-
     extern unsigned char __ddr_code_start[];
     extern unsigned char __ddr_code_end[];
     extern unsigned char __ddr_src_start[];
     print("__ddr_code_start: 0x%x\n", __ddr_code_start); 
     print("__ddr_code_end:   0x%x\n", __ddr_code_end); 
     print("__ddr_src_start:  0x%x\n", __ddr_src_start); 
-    
-//    memcpy(TargetBuf, QSpiBuf, sizeof(QSpiBuf)/2);
-    
-    //trash();
-    void cpy32_ddr(uint32_t *const dst, const uint32_t *src, const uint32_t count);
-    cpy32_ddr(TargetBuf, Buf, 2);
-    
-    cpy32(TargetBuf, Buf, BUF_SIZE);
-    cpy32(TargetBuf, Buf, BUF_SIZE);
-    
-//  print("Start DDR test\n");
-//  const uint32_t DDR_SIZE = 512*1024*1024;
-//  uint32_t *ptr = reinterpret_cast<uint32_t *>(0x100000);
-//
-//  print("write DDR...\n");
-//  uint32_t t0 = rdpa(GTMR_CNT0_REG);
-//  for(uint32_t i = 0; i < DDR_SIZE/sizeof(uint32_t); ++i)
-//  {
-//      ptr[i] = i;
-//  }
-//  uint32_t t1 = rdpa(GTMR_CNT0_REG);
-//  print("verify DDR...\n");
-//  uint32_t i;
-//  uint32_t t2 = rdpa(GTMR_CNT0_REG);
-//  for(i = 0; i < DDR_SIZE/sizeof(uint32_t); ++i)
-//  {
-//      if(ptr[i] != i)
-//      {
-//          print("E: addr: 0x%x, i: %d, data: %d\n", ptr + i, i, ptr[i]);
-//          break;
-//      }
-//  }
-//  uint32_t t3 = rdpa(GTMR_CNT0_REG);
-//
-//  print("DDR test finished. Words tested: %d\n", i);
-//  print("write time:  %d (%f s)\n", t1-t0, (t1-t0)*5e-9);
-//  print("verify time: %d (%f s)\n", t3-t2, (t3-t2)*5e-9);
-//  print("verify/write ratio: %f\n", (static_cast<float>(t3-t2))/(t1-t0));
-    
 
-    
     bool load_img(const uint32_t img_addr);
-    
-    load_img(0x20000);
-    
+    //load_img(0x20000);
+
     for(;;)
     {
         
+        wrpa(GPIO_MASK_DATA_0_LSW_REG, (~(1ul << 13) << 16) | (1ul << 13) );  // JE1 on
+        wrpa(GPIO_MASK_DATA_0_LSW_REG, (~(1ul << 13) << 16) | 0 );            // JE1 off
        // QSpi.run();
         
         
@@ -260,9 +221,9 @@ void default_isr_handler()
     __isb();
 }
 //------------------------------------------------------------------------------
-void cpy32(uint32_t * const dst, const uint32_t *src, const uint32_t count) 
+void cpy32(uint32_t * const dst, const uint32_t * src, const size_t count)
 {
-    for(uint32_t i = 0; i < count; ++i)
+    for(size_t i = 0; i < count; ++i)
     {
         dst[i] = src[i];
     }
