@@ -165,6 +165,25 @@ int main()
     print("__ddr_code_end:   0x%x\n", __ddr_code_end); 
     print("__ddr_src_start:  0x%x\n", __ddr_src_start); 
 
+    //----------------------------------------------------------------
+    //
+    //    Relocate OCM to upper memory
+    //
+    disable_interrupts();
+
+    slcr_unlock();
+    __dsb();
+    __isb();
+
+    sbpa(OCM_CFG_REG, 0x07);  // OCM0, OCM1 and OCM2 segments relocate
+    slcr_lock();
+    wrpa(SCU_CTRL_REG, 0);    // disable SCU address filtering
+    wrpa(FILTERING_START_ADDR_REG, 0);
+    wrpa(SCU_CTRL_REG, SCU_ADDRESS_FILTERING_ENABLE_MASK | SCU_ENABLE_MASK);   // enable SCU address filtering
+    __dmb();
+    __isb();
+    //----------------------------------------------------------------
+
     bool load_img(const uint32_t img_addr);
     //load_img(0x20000);
 
