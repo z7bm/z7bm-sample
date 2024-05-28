@@ -25,7 +25,7 @@
                 MenuCaption="&amp;Build Vivado Project"
                 Verbose="1"
                 RunFromDir="%rw">
-                <Exec CmdLine="etime.sh scons -s variant=%bn prjsyn"/>
+                <Exec CmdLine="etime.sh scons bv=%bn apu"/>
             </Target>
             <Target
                 Name="Rebuild"
@@ -71,11 +71,17 @@
                 ClearProcessBuffer="1">
                 <Exec CmdLine="etime.sh scons -s variant=%bn prjopen"/>
             </Target>
+            <Target
+                Name="Load APU"
+                MenuCaption="Load AP&amp;U"
+                RunFromDir="%rw"
+                CaptureOutputWith="ProcessBuffer"
+                SaveOption="SaveAll">
+                <Exec CmdLine="etime.sh scons bv=%bn apuld"/>
+            </Target>
         </Menu>
     </Config>
     <CustomFolders></CustomFolders>
-    <List Name="RTE">
-    </List>
     <Files AutoFolders="DirectoryView">
         <F
             N="*"
@@ -83,4 +89,6 @@
             Excludes=""
             L="1"/>
     </Files>
+    <List Name="RTE">
+    </List>
 </Project>

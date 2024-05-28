@@ -79,6 +79,8 @@ __vector_table:
     B   FIQHandler
 
 
+.section .exhandlers
+
 IRQHandler:                 /* IRQ vector handler */
 
     stmdb   sp!,{r0-r3,r12,lr}      /* state save from compiled code*/

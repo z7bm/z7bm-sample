@@ -55,6 +55,8 @@ volatile uint32_t dbuf[64];
 //------------------------------------------------------------------------------
 bool load_img(const uint32_t img_addr)
 {
+    return true; // tmp solution
+    
     TSectionHeader Header;
     
     uint32_t flash_addr = img_addr;

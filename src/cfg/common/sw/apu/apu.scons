@@ -70,9 +70,7 @@ def preprocess_linker_script(target, source, env):
     src_script = env['SRC_LINKER_SCRIPT']
     trg_script = env['TRG_LINKER_SCRIPT']
 
-    cmd = env['CPP'] + ' -P -undef ' + src_script + ' ' + trg_script
-
-    #print(cmd)
+    cmd = '{} -P -udnef -I{} {} {}'.format(env['CPP'],  env['BUILD_SRC_PATH'], src_script, trg_script)
 
     rcode, out, err = cexec(cmd)
     out += err
@@ -196,6 +194,16 @@ envx.Append(LINKFLAGS='-Wl,-Map={},--cref'.format(map_filename))
 
 #-----------------------------------------------------------
 #
+#    Add command-line macros
+#
+apu_params = read_config('apu_params.yml')
+
+for p in apu_params:
+    envx.Append(CPPDEFINES = '{}={}'.format(p, apu_params[p]))
+    envx.Append(LINKFLAGS = '-Wl,"--defsym={}={}"'.format(p, apu_params[p]))
+
+#-----------------------------------------------------------
+#
 #    Bootloader-specific Construction Environment
 #
 envbld = envx.Clone()
@@ -233,9 +241,9 @@ libz7lib  = envx.StaticLibrary(str(lib_build_path / 'z7lib'), obj_z7lib)
 #    Bootloader
 #
 bld_obj  = make_objects(envx, src_bld,  str(bld_obj_path))
-bld_obj += make_objects(envx, src_gen, str(bld_obj_path))
+bld_obj += make_objects(envx, src_gen,  str(bld_obj_path))
 
-bld = envbld.Program(str(bld_build_path / 'bld'), bld_obj)
+bld = envbld.Program(str(bld_build_path / 'bld.elf'), bld_obj)
 bld_cpp_ld = Action(preprocess_linker_script, None)
 envbld.AddPreAction(bld, bld_cpp_ld)
 envbld.AddPostAction(bld, create_prg_lst)
@@ -247,7 +255,7 @@ Depends(bld, envbld['SRC_LINKER_SCRIPT'])
 #
 cam_obj  = make_objects(envx, src_cam,  str(cam_obj_path))
 
-cam = envx.Program(str(cam_build_path / 'cam'), cam_obj)
+cam = envx.Program(str(cam_build_path / 'cam.elf'), cam_obj)
 cam_cpp_ld = Action(preprocess_linker_script, None)
 envx.AddPreAction(cam, cam_cpp_ld)
 envbld.AddPostAction(cam, create_prg_lst)

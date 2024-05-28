@@ -9,6 +9,8 @@
 import os
 import sys
 
+from pathlib import Path
+
 sys.path.append(os.path.join(os.pardir, 'common'))
 
 from build_main import *
@@ -34,15 +36,25 @@ class BuildZed(BuildMain):
 
         envx = self.envx
         VivadoProject = self.VivadoProject
-        self.apu = SConscript(os.path.join(self.dirs.COMMON, 'sw', 'apu', 'apu.scons'), exports = ['envx', 'VivadoProject'])
-        #self.bl = SConscript(os.path.join(self.dirs.COMMON, 'sw', 'apu', 'apu.scons'), variant_dir=envx['DIRS'].BUILD + '/sw/apu/bl' , exports = 'envx')
+        self.apu = SConscript(Path(self.dirs.COMMON) / 'sw' / 'apu' / 'apu.scons', exports = ['envx', 'VivadoProject'])
 
-        self.envx.Alias('apu', self.apu)
+        xsct = Path(envx['XILINX_VITIS']) / 'bin' / 'xsct'
+
+        def load(target, source, env):
+            cmd = str(xsct) + ' ' + self.dirs.SCRIPT_COMMON + os.sep + 'load.tcl'
+            cexec(cmd)
+
+        apu_load = envx.Action(load, colorize('load apu', 'yellow', True))
+        self.apuld = envx.Command('apuld', self.apu, apu_load)
+
+        self.envx.Alias('apu',   self.apu)
+        self.envx.Alias('apuld', self.apuld)
 
         Help("""
             Software Targets
             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                apu : build APU programs
+                apu   : build APU programs
+                apuld : load APU
             """)
 
 
