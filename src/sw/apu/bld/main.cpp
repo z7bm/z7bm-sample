@@ -30,9 +30,9 @@ extern uint32_t QSpiBuf_ddr[QSPI_BUF_SIZE];
 TQSpi QSpi_ddr(QSpiBuf_ddr);
 
 
-const uint32_t UART1_TX_BUF_SIZE = 2048;
-usr::ring_buffer<char, UART1_TX_BUF_SIZE, uint16_t> Uart1_TxBuf;
-TUart Uart1(UART1_ADDR);
+//const uint32_t UART1_TX_BUF_SIZE = 2048;
+//usr::ring_buffer<char, UART1_TX_BUF_SIZE, uint16_t> Uart1_TxBuf;
+Uart uart1(UART1_ADDR);
 
 
 //------------------------------------------------------------------------------
@@ -50,7 +50,7 @@ int print(const char *format, ...)
     uint16_t size = vsprintf(print_buf, format, args); //
     va_end(args);                                      //
                                                        //
-    Uart1.send(print_buf);
+    uart1.send(print_buf);
     //TxBuf.write(print_buf, size);                      // put formatted data to port buffer
                                                        //
     return size;
@@ -153,7 +153,7 @@ int main()
     
    // QSpi.init();
     QSpi_ddr.init();
-    Uart1.init();
+    uart1.init();
     
     print("mamont12345678 go to North!\n");
     print("slon go to North!\n");

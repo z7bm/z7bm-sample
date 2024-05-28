@@ -2,6 +2,7 @@
 #include <ps7mmrs.h>
 #include "z7int.h"
 #include "z7qspi.h"
+#include "z7uart.h"
 
                
 const uint32_t PIN_INT = 50;
@@ -14,6 +15,7 @@ uint8_t Buf[1024];
 uint8_t bbb = 0x34;
 uint8_t aaa = 0x56;
 uint8_t ccc = 0x78;
+Uart uart1(UART1_ADDR);
 
 uint32_t slonick(uint32_t x)
 {

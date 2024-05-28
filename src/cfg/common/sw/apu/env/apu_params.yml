@@ -13,3 +13,5 @@ parameters:
     UNDEF_STACK_SIZE      : 1024
 
     HEAP_SIZE             : 4096
+
+    UART_TX_BUF_SIZE      : 1024
