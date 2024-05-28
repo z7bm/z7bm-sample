@@ -6,7 +6,6 @@ MEMORY
    OCM_DATA : ORIGIN = 0xFFFE0000, LENGTH = 64k*2 - 16k
 }
 
-
 ENTRY(__vector_table)
 
 SECTIONS
@@ -80,12 +79,12 @@ SECTIONS
    __data_end = .;
 } > OCM_DATA
 //--------------------------------------------------------------------
-.data1 : {
-   __data1_start = .;
-   *(.data1)
-   *(.data1.*)
-   __data1_end = .;
-} > OCM_DATA
+//.data1 : {
+//   __data1_start = .;
+//   *(.data1)
+//   *(.data1.*)
+//   __data1_end = .;
+//} > OCM_DATA
 //--------------------------------------------------------------------
 .ctors : {
    __CTOR_LIST__ = .;
@@ -114,14 +113,14 @@ SECTIONS
    KEEP (*(SORT(.init_array.*)))
    KEEP (*(.init_array))
    __init_array_end = .;
-} > OCM_CODE
+} > OCM_DATA
 //--------------------------------------------------------------------
 .fini_array : {
    __fini_array_start = .;
    KEEP (*(SORT(.fini_array.*)))
    KEEP (*(.fini_array))
    __fini_array_end = .;
-} > OCM_CODE
+} > OCM_DATA
 //--------------------------------------------------------------------
 .ARM.attributes : {
    __ARM.attributes_start = .;
