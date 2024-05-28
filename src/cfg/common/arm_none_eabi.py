@@ -64,13 +64,14 @@ def setup_default_env(env):
     CXXFLAGS  = GCCFLAGS.copy()
     CXXFLAGS.append('-fno-exceptions')
     CXXFLAGS.append('-fno-rtti')
-    CXXFLAGS.append('-std=gnu++11')
+    CXXFLAGS.append('-std=gnu++17')
     CXXFLAGS.append('-funsigned-bitfields')
     CXXFLAGS.append('-fshort-enums')
     #-----------------------------------------------------------
     LFLAGS = FLAGS.copy()
     LFLAGS.append('-Wl,--gc-sections')
     LFLAGS.append('--specs=nano.specs')
+    LFLAGS.append('--specs=nosys.specs')
     #LFLAGS.append(' -L '   + ObjDir + LibraryPathOptions)
     LFLAGS.append('-nostartfiles')
     #-------------------------------------------------------------------------------
