@@ -5,15 +5,25 @@ proc cn { } {
 }
 
 # reload
+proc rlbld { } {
+    rst
+    dow build/zed/sw/apu/bld/bld.elf
+    con
+}
+
+
 proc rl { } {
     rst
     dow build/zed/sw/apu/bld/bld.elf
-    con 
-}
+    bpadd load_img
+    con
+    while { [state] == "Running" } {
 
-# restart
-proc rs { } {
-    rl
-    con 
+    }
+    bpremove -all
+
+    dow build/zed/sw/apu/cam/cam.elf
+
+    con
 }
 
