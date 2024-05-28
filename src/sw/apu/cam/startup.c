@@ -40,7 +40,6 @@ extern unsigned char __bss_start[];
 extern unsigned char __bss_end[];
 extern unsigned char __stack[];
 
-//extern void __cpu_init();
 extern int  main();
 
 __attribute__ ((weak))
@@ -48,10 +47,10 @@ int  __low_level_init();
 void __libc_init_array();
 
 //------------------------------------------------------------------------------
-void __start()
+void __cstart()
 {
 //    __cpu_init();
-    __asm__ __volatile__ ("    ldr r13, =%0;" :  : "" (__stack) );
+    //__asm__ __volatile__ ("    ldr r13, =%0;" :  : "" (__stack) );
     if( __low_level_init() )
     {
       //  memcpy(__data_start, __idata_start, __data_end - __data_start); // copy initialized variables
