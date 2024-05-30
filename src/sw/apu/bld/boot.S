@@ -411,11 +411,28 @@ Sync:   ldr r1, [r0]
     msr cpsr_xsf, r0
 
 
-    b   _start              /* jump to C startup code */
-    and r0, r0, r0          /* no op */
+   // Clear cp15 regs with unknown reset values
+    mov r0, #0x0
+    mcr p15, 0, r0, c5, c0, 0                    //  DFSR
+    mcr p15, 0, r0, c5, c0, 1                    //  IFSR
+    mcr p15, 0, r0, c6, c0, 0                    //  DFAR
+    mcr p15, 0, r0, c6, c0, 2                    //  IFAR
+    mcr p15, 0, r0, c9, c13, 2                   //  PMXEVCNTR
+    mcr p15, 0, r0, c13, c0, 2                   //  TPIDRURW
+    mcr p15, 0, r0, c13, c0, 3                   //  TPIDRURO
 
-.Ldone: b   .Ldone              /* Paranoia: we should never get here */
+    // Reset and start Cycle Counter
+    mov r2, #0x80000000                          //  clear overflow */
+    mcr p15, 0, r2, c9, c12, 3                   //
+    mov r2, #0xd                                 //  D, C, E */
+    mcr p15, 0, r2, c9, c12, 0                   //
+    mov r2, #0x80000000                          //  enable cycle counter */
+    mcr p15, 0, r2, c9, c12, 1                   //
 
+    b   _start                                   //  jump to C startup code */
+    and r0, r0, r0                               //  no op */
+                                                 //
+.Ldone: b   .Ldone                               //  Paranoia: we should never get here */
 
 /*
  *************************************************************************

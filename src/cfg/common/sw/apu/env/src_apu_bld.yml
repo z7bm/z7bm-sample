@@ -5,7 +5,6 @@ sources:
     - src/sw/apu/bld/boot.S
     - src/sw/apu/bld/asm_vectors.S
     - src/sw/apu/bld/translation_table.S
-    - src/sw/apu/bld/cpu_init.S
     - src/sw/apu/bld/startup.c
     - src/sw/apu/bld/exc.cpp
     - src/sw/apu/bld/loader.cpp
