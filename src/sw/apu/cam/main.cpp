@@ -17,8 +17,6 @@ void default_isr_handler();
 
 Uart uart1(UART1_ADDR);
 
-int aaa = 11;
-
 //------------------------------------------------------------------------------
 const int TX_BUF_SIZE = 256;
 
@@ -89,8 +87,6 @@ int main()
     enable_interrupts();
 
     print("cam: program start!\n");
-
-    print("aaa: %d\n", aaa);
 
     for(;;)
     {

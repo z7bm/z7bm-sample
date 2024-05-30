@@ -140,9 +140,6 @@ int main()
 
     enable_interrupts();
     
-    void cpy32(uint32_t * const dst, const uint32_t *src, const uint32_t count);
-    void trash();
-    
    // QSpi.init();
     QSpi_ddr.init();
     uart1.init();
