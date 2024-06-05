@@ -81,7 +81,7 @@ int main()
 { 
     //----------------------------------------------------------------
     //
-    //    relocate MMU translate table
+    //    relocate and remap MMU translate table
     //
     remap_mmu_tt(MMU_TT_INIT_ADDR, MMU_TT_ADDR);
 
@@ -132,16 +132,13 @@ int main()
     gic_int_enable(PS7IRQ_ID_GPIO);
 
     sbpa(GIC_ICCPMR, 0xff);
-    gic_set_priority(PS7IRQ_ID_SW7, 0x10);
+    //gic_set_priority(PS7IRQ_ID_SW7, 0x10);
 
 
     sbpa(GIC_ICDDCR, 0x1);
     sbpa(GIC_ICCICR, 0x1);
 
     enable_interrupts();
-    
-    void cpy32(uint32_t * const dst, const uint32_t *src, const uint32_t count);
-    void trash();
     
    // QSpi.init();
     QSpi_ddr.init();

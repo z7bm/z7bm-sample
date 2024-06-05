@@ -47,10 +47,6 @@ extern unsigned char __ddr_code_start[];
 extern unsigned char __ddr_code_end[];
 extern unsigned char __ddr_src_start[];
 
-
-
-
-extern void __cpu_init();
 extern int  main();
 
 __attribute__ ((weak))
@@ -60,8 +56,6 @@ void __libc_init_array();
 //------------------------------------------------------------------------------
 void _start()
 {
-    __cpu_init();
-    __asm__ __volatile__ ("    ldr r13, =%0;" :  : "" (__stack) );
     if( __low_level_init() )
     {
         ps7_init();                                                                   //
