@@ -132,7 +132,7 @@ int main()
     gic_int_enable(PS7IRQ_ID_GPIO);
 
     sbpa(GIC_ICCPMR, 0xff);
-    gic_set_priority(PS7IRQ_ID_SW7, 0x10);
+    //gic_set_priority(PS7IRQ_ID_SW7, 0x10);
 
 
     sbpa(GIC_ICDDCR, 0x1);
