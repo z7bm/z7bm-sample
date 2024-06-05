@@ -81,7 +81,7 @@ int main()
 { 
     //----------------------------------------------------------------
     //
-    //    relocate MMU translate table
+    //    relocate and remap MMU translate table
     //
     remap_mmu_tt(MMU_TT_INIT_ADDR, MMU_TT_ADDR);
 
