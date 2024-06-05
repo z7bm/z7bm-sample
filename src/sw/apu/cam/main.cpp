@@ -5,6 +5,7 @@
 
 #include <ps7mmrs.h>
 #include "z7int.h"
+#include "z7ptmr.h"
 #include "z7qspi.h"
 #include "z7uart.h"
 
@@ -12,6 +13,7 @@
 const uint32_t PIN_INT = 50;
 
 void swi_isr_handler();
+void ptmr_isr_handler();
 void gpio_isr_handler();
 void default_isr_handler();
 
@@ -54,8 +56,9 @@ int main()
         ps7_register_isr_handler(&default_isr_handler, i);
     }
 
-    ps7_register_isr_handler(&swi_isr_handler,  PS7IRQ_ID_SW15);
-    ps7_register_isr_handler(&gpio_isr_handler, PS7IRQ_ID_GPIO);
+    ps7_register_isr_handler(&swi_isr_handler,   PS7IRQ_ID_SW15);
+    ps7_register_isr_handler(&ptmr_isr_handler,  PS7IRQ_ID_PTMR);
+    ps7_register_isr_handler(&gpio_isr_handler,  PS7IRQ_ID_GPIO);
 
     //------------------------------------------------------
     //
@@ -77,6 +80,15 @@ int main()
 
     sbpa(GIC_ICDDCR, 0x1);  // enable GIC Distributor
     sbpa(GIC_ICCICR, 0x1);  // enable interruptes for CPU interfaces
+
+    //------------------------------------------------------
+    //
+    //    CPU 0 Private Timer
+    //
+    //PrivateTimer::set_reload_value<200, 1>();
+    gic_int_enable(PS7IRQ_ID_PTMR);
+    PrivateTimer::set_reload_value(200, 1);
+    PrivateTimer::start();
 
     //------------------------------------------------------
     //
@@ -115,6 +127,18 @@ int main()
     }
 }
 //------------------------------------------------------------------------------
+void ptmr_isr_handler()
+{
+    if(rdpa(GPIO_DATA_0_REG) & (1ul << 10))
+    {
+        wrpa(GPIO_MASK_DATA_0_LSW_REG, (~(1ul << 10) << 16) | 0 );            // JE2 off
+    }
+    else
+    {
+        wrpa(GPIO_MASK_DATA_0_LSW_REG, (~(1ul << 10) << 16) | (1ul << 10) );  // JE2 on
+    }
+}
+//------------------------------------------------------------------------------
 void gpio_isr_handler()
 {
     //write_pa(GPIO_INT_STAT_1_REG, 1ul << 18);
@@ -133,13 +157,10 @@ void swi_isr_handler()
 //  wrpa(GPIO_MASK_DATA_0_MSW_REG, (~(1ul << 0) << 16) | (1ul << 0) );
 //  wrpa(GPIO_MASK_DATA_0_MSW_REG, (~(1ul << 0) << 16) | 0 );
     
-    wrpa(GPIO_MASK_DATA_0_LSW_REG, (~(1ul << 10) << 16) | (1ul << 10) );  // JE2 on
-    wrpa(GPIO_MASK_DATA_0_LSW_REG, (~(1ul << 10) << 16) | 0 );            // JE2 off
-    wrpa(GPIO_MASK_DATA_0_LSW_REG, (~(1ul << 10) << 16) | (1ul << 10) );  // JE2 on
-    wrpa(GPIO_MASK_DATA_0_LSW_REG, (~(1ul << 10) << 16) | 0 );            // JE2 off
-                                                                          //
-//  uint32_t sgi_num = rdpa(GIC_ICCIAR);
-//  wrpa(GIC_ICCEOIR, sgi_num);
+//  wrpa(GPIO_MASK_DATA_0_LSW_REG, (~(1ul << 10) << 16) | (1ul << 10) );  // JE2 on
+//  wrpa(GPIO_MASK_DATA_0_LSW_REG, (~(1ul << 10) << 16) | 0 );            // JE2 off
+//  wrpa(GPIO_MASK_DATA_0_LSW_REG, (~(1ul << 10) << 16) | (1ul << 10) );  // JE2 on
+//  wrpa(GPIO_MASK_DATA_0_LSW_REG, (~(1ul << 10) << 16) | 0 );            // JE2 off
 
 }
 //------------------------------------------------------------------------------
