@@ -54,7 +54,7 @@ int main()
         ps7_register_isr_handler(&default_isr_handler, i);
     }
 
-    ps7_register_isr_handler(&swi_isr_handler,  PS7IRQ_ID_SW7);
+    ps7_register_isr_handler(&swi_isr_handler,  PS7IRQ_ID_SW15);
     ps7_register_isr_handler(&gpio_isr_handler, PS7IRQ_ID_GPIO);
 
     //------------------------------------------------------
@@ -73,7 +73,7 @@ int main()
     gic_int_enable(PS7IRQ_ID_GPIO);
 
     sbpa(GIC_ICCPMR, 0xff);
-    gic_set_priority(PS7IRQ_ID_SW7, 16);
+    gic_set_priority(PS7IRQ_ID_SW15, 30);    // lowest priority
 
     sbpa(GIC_ICDDCR, 0x1);  // enable GIC Distributor
     sbpa(GIC_ICCICR, 0x1);  // enable interruptes for CPU interfaces
@@ -88,10 +88,30 @@ int main()
 
     print("cam: program start!\n");
 
+    uint32_t n = 100;
+
     for(;;)
     {
-        wrpa(GPIO_MASK_DATA_0_LSW_REG, (~(1ul << 10) << 16) | (1ul << 10) );  // JE2 on
-        wrpa(GPIO_MASK_DATA_0_LSW_REG, (~(1ul << 10) << 16) | 0 );            // JE2 off
+        wrpa(GPIO_MASK_DATA_0_LSW_REG, (~(1ul << 13) << 16) | (1ul << 13) );  // JE1 on
+        wrpa(GPIO_MASK_DATA_0_LSW_REG, (~(1ul << 13) << 16) | 0 );            // JE1 off
+
+
+        if(--n == 0)
+        {
+            n = 100;
+            wrpa( GIC_ICDSGIR,                                   // 0b10: send the interrupt on only to the CPU
+                  (2 << GIC_ICDSGIR_TARGET_LIST_FILTER_BPOS) +   // interface that requested the interrupt
+                   PS7IRQ_ID_SW15                                // rise software interrupt ID15
+                  );
+            
+
+        }
+
+//      wrpa(GPIO_MASK_DATA_0_LSW_REG, (~(1ul << 10) << 16) | (1ul << 10) );  // JE2 on
+//      wrpa(GPIO_MASK_DATA_0_LSW_REG, (~(1ul << 10) << 16) | 0 );            // JE2 off
+                                                                              //
+
+
     }
 }
 //------------------------------------------------------------------------------
@@ -109,12 +129,17 @@ void gpio_isr_handler()
 //------------------------------------------------------------------------------
 void swi_isr_handler()
 {
-    __nop();
-    wrpa(GPIO_MASK_DATA_0_MSW_REG, (~(1ul << 0) << 16) | (1ul << 0) );
-    wrpa(GPIO_MASK_DATA_0_MSW_REG, (~(1ul << 0) << 16) | 0 );
+//  __nop();
+//  wrpa(GPIO_MASK_DATA_0_MSW_REG, (~(1ul << 0) << 16) | (1ul << 0) );
+//  wrpa(GPIO_MASK_DATA_0_MSW_REG, (~(1ul << 0) << 16) | 0 );
     
     wrpa(GPIO_MASK_DATA_0_LSW_REG, (~(1ul << 10) << 16) | (1ul << 10) );  // JE2 on
     wrpa(GPIO_MASK_DATA_0_LSW_REG, (~(1ul << 10) << 16) | 0 );            // JE2 off
+    wrpa(GPIO_MASK_DATA_0_LSW_REG, (~(1ul << 10) << 16) | (1ul << 10) );  // JE2 on
+    wrpa(GPIO_MASK_DATA_0_LSW_REG, (~(1ul << 10) << 16) | 0 );            // JE2 off
+                                                                          //
+//  uint32_t sgi_num = rdpa(GIC_ICCIAR);
+//  wrpa(GIC_ICCEOIR, sgi_num);
 
 }
 //------------------------------------------------------------------------------
