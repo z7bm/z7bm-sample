@@ -13,3 +13,6 @@
 [submodule "lib/xil"]
 	path = lib/xil
 	url = https://github.com/z7bm/xil.git
+[submodule "lib/scmrtos"]
+	path = lib/scmrtos
+	url = https://github.com/scmrtos/scmrtos.git
