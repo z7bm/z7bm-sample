@@ -58,7 +58,7 @@
 * None.
 *
 ******************************************************************************/
-//#include "xil_errata.h"
+#include "xil_errata.h"
 
 #define __ARM_NEON__ 1
 
