@@ -18,9 +18,9 @@ from arm_none_eabi import setup_default_env
 #
 def make_objects(env, src, dst_dir, ext = 'o'):
     obj_list = []
-    src_base = str( Path(src[0]).parent )
 
     for s in src:
+        src_base = str( Path(s).parent )
         o = s.replace(src_base, dst_dir)
         o = drop_suffix(o) + '.' + ext
         obj = env.Object(o, s)[0]

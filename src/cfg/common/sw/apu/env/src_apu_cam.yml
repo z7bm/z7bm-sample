@@ -2,10 +2,10 @@
 
 sources:
 
+    - src/sw/apu/common/exc.cpp
     - src/sw/apu/cam/asm_vectors.S
     - src/sw/apu/cam/start.S
     - src/sw/apu/cam/startup.c
-    - src/sw/apu/cam/exc.cpp
     - src/sw/apu/cam/main.cpp
 
 
