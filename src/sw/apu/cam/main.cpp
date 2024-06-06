@@ -6,6 +6,7 @@
 #include <ps7mmrs.h>
 #include "z7int.h"
 #include "z7ptmr.h"
+#include "z7gpio.h"
 #include "z7qspi.h"
 #include "z7uart.h"
 
@@ -104,39 +105,28 @@ int main()
 
     for(;;)
     {
-        wrpa(GPIO_MASK_DATA_0_LSW_REG, (~(1ul << 13) << 16) | (1ul << 13) );  // JE1 on
-        wrpa(GPIO_MASK_DATA_0_LSW_REG, (~(1ul << 13) << 16) | 0 );            // JE1 off
-
-
         if(--n == 0)
         {
-            n = 100;
+            n = 10000;
             wrpa( GIC_ICDSGIR,                                   // 0b10: send the interrupt on only to the CPU
                   (2 << GIC_ICDSGIR_TARGET_LIST_FILTER_BPOS) +   // interface that requested the interrupt
                    PS7IRQ_ID_SW15                                // rise software interrupt ID15
                   );
-            
-
         }
-
-//      wrpa(GPIO_MASK_DATA_0_LSW_REG, (~(1ul << 10) << 16) | (1ul << 10) );  // JE2 on
-//      wrpa(GPIO_MASK_DATA_0_LSW_REG, (~(1ul << 10) << 16) | 0 );            // JE2 off
-                                                                              //
-
-
     }
 }
 //------------------------------------------------------------------------------
 void ptmr_isr_handler()
 {
-    if(rdpa(GPIO_DATA_0_REG) & (1ul << 10))
+    volatile auto slon = 0;
+
+    gpio::pin_on(10);  // JE2 on
+    for(size_t i = 0; i < 1000; ++i)
     {
-        wrpa(GPIO_MASK_DATA_0_LSW_REG, (~(1ul << 10) << 16) | 0 );            // JE2 off
+        ++slon;
     }
-    else
-    {
-        wrpa(GPIO_MASK_DATA_0_LSW_REG, (~(1ul << 10) << 16) | (1ul << 10) );  // JE2 on
-    }
+    gpio::pin_off(10); // JE2 off
+    
 }
 //------------------------------------------------------------------------------
 void gpio_isr_handler()
@@ -147,21 +137,17 @@ void gpio_isr_handler()
     wrpa(GPIO_MASK_DATA_0_LSW_REG, (~(1ul << 7) << 16) | (1ul << 7) );
     wrpa(GPIO_MASK_DATA_0_LSW_REG, (~(1ul << 7) << 16) | 0 );
 
-    //write_pa(GPIO_MASK_DATA_0_LSW_REG, (~(1ul << 13) << 16) | (1ul << 13) );  // JE1 on
-    //write_pa(GPIO_MASK_DATA_0_LSW_REG, (~(1ul << 13) << 16) | 0 );            // JE1 off
 }
 //------------------------------------------------------------------------------
 void swi_isr_handler()
 {
-//  __nop();
-//  wrpa(GPIO_MASK_DATA_0_MSW_REG, (~(1ul << 0) << 16) | (1ul << 0) );
-//  wrpa(GPIO_MASK_DATA_0_MSW_REG, (~(1ul << 0) << 16) | 0 );
-    
-//  wrpa(GPIO_MASK_DATA_0_LSW_REG, (~(1ul << 10) << 16) | (1ul << 10) );  // JE2 on
-//  wrpa(GPIO_MASK_DATA_0_LSW_REG, (~(1ul << 10) << 16) | 0 );            // JE2 off
-//  wrpa(GPIO_MASK_DATA_0_LSW_REG, (~(1ul << 10) << 16) | (1ul << 10) );  // JE2 on
-//  wrpa(GPIO_MASK_DATA_0_LSW_REG, (~(1ul << 10) << 16) | 0 );            // JE2 off
-
+    volatile auto slon = 0;
+    gpio::pin_on(13);
+    for(size_t i = 0; i < 1000; ++i)
+    {
+        ++slon;
+    }
+    gpio::pin_off(13);
 }
 //------------------------------------------------------------------------------
 void default_isr_handler()
