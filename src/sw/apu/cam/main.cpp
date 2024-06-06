@@ -65,9 +65,9 @@ int main()
     //
     //    Setup GPIO interrupt
     //
-    gpio_clr_int_sts(PIN_INT);
-    gpio_int_pol(PIN_INT, GPIO_INT_POL_HIGH_RISE);
-    gpio_int_en(PIN_INT);
+//  gpio_clr_int_sts(PIN_INT);
+//  gpio_int_pol(PIN_INT, GPIO_INT_POL_HIGH_RISE);
+//  gpio_int_en(PIN_INT);
 
     gic_int_enable(PS7IRQ_ID_UART1);
     gic_set_target(PS7IRQ_ID_UART1, GIC_CPU0);
@@ -79,16 +79,14 @@ int main()
     sbpa(GIC_ICCPMR, 0xff);
     gic_set_priority(PS7IRQ_ID_SW15, 30);    // lowest priority
 
-    sbpa(GIC_ICDDCR, 0x1);  // enable GIC Distributor
-    sbpa(GIC_ICCICR, 0x1);  // enable interruptes for CPU interfaces
 
     //------------------------------------------------------
     //
     //    CPU 0 Private Timer
     //
-    //PrivateTimer::set_reload_value<200, 1>();
+    gic_set_priority(PS7IRQ_ID_PTMR, 5);
     gic_int_enable(PS7IRQ_ID_PTMR);
-    PrivateTimer::set_reload_value(200, 1);
+    PrivateTimer::set_reload_value(200, 1000); // MHz, us
     PrivateTimer::start();
 
     //------------------------------------------------------
@@ -96,6 +94,10 @@ int main()
     //    Initialize peripherals
     //
     uart1.init();
+
+    wrpa(GIC_ICCBPR, 2);
+    sbpa(GIC_ICDDCR, 0x1);  // enable GIC Distributor
+    sbpa(GIC_ICCICR, 0x1);  // enable interruptes for CPU interfaces
 
     enable_interrupts();
 
