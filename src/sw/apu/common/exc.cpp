@@ -49,7 +49,13 @@ void IRQInterrupt()
     const uint32_t INT_ID = int_id_stack.save();
     if (INT_ID < PS7_MAX_IRQ_ID)
     {
+    #if NESTED_INTERRUPTS_ENABLE == 1
+        enable_nested_interrupts();
+    #endif
         (*PS7Handlers[INT_ID])();
+    #if NESTED_INTERRUPTS_ENABLE == 1
+        disable_nested_interrupts();
+    #endif
     }
     int_id_stack.restore();
 }
