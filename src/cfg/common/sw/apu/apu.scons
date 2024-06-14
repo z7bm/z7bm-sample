@@ -191,7 +191,6 @@ envx.Prepend(CXXFLAGS  = FLAGS)
 envx.Append(CPPPATH = ['#lib/ps7mmr/const',
                        '#lib/z7lib',
                        '#lib/xil',
-                       '#src/sw/include',
                        '#lib/scmrtos/core',
                        '#lib/scmrtos/port/zynq7k',
                        '#src/sw/apu/cam',
