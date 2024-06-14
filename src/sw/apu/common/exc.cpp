@@ -39,12 +39,12 @@ IntIdStack int_id_stack;
 extern "C"
 {
 
-intptr_t PrefetchAbortAddr;
-intptr_t DataAbortAddr;
-intptr_t UndefinedExceptionAddr;
+intptr_t prefetch_abort_addr;
+intptr_t data_abort_addr;
+intptr_t undefined_exception_addr;
 
 //------------------------------------------------------------------------------
-void IRQInterrupt()             
+void irq_handler()
 { 
     const uint32_t INT_ID = int_id_stack.save();
     if (INT_ID < PS7_MAX_IRQ_ID)
@@ -61,11 +61,9 @@ void IRQInterrupt()
 }
 //------------------------------------------------------------------------------
 
-void FIQInterrupt()             { }
-void UndefinedException()       { }
-void SWInterrupt()              { }
-void DataAbortInterrupt()       { }
-void PrefetchAbortInterrupt()   { }
+void undefined_exception()       { }
+void data_abort_exception()      { }
+void prefetch_abort_exception()  { }
 
 }  // extern "C"
 //------------------------------------------------------------------------------
