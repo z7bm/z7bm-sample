@@ -107,6 +107,9 @@ add_search_path( str( Path(dirs.COMMON) / 'sw' / 'apu' / 'env' ) )
 
 build_root = Path(dirs.BUILD)
 
+apu_params = read_config('apu_params.yml')
+fpu_enable = apu_params['FPU_ENABLE']
+
 #---------------------------------------------------------------------
 #
 #    Libraries
@@ -171,8 +174,13 @@ setup_default_env(envx)
 FLAGS = []
 FLAGS.append('-mcpu=' + CPU)
 FLAGS.append('-mtune=cortex-a9')
-FLAGS.append('-mfloat-abi=hard')
-FLAGS.append('-mfpu=vfpv3')
+if fpu_enable:
+    FLAGS.append('-mfloat-abi=hard')
+    FLAGS.append('-mfpu=vfpv3')
+else:
+    FLAGS.append('-mfloat-abi=soft')
+
+
 FLAGS.append(Optimization)
 FLAGS.append(DebugLevel)
 
@@ -184,6 +192,9 @@ envx.Append(CPPPATH = ['#lib/ps7mmr/const',
                        '#lib/z7lib',
                        '#lib/xil',
                        '#src/sw/include',
+                       '#src/sw/lib/scmrtos/core',
+                       '#src/sw/lib/scmrtos/port/zynq7k',
+                       '#src/sw/apu/cam',
                        str(build_root / 'src')])
 
 envx.Append(LIBPATH = lib_build_path)
@@ -196,8 +207,6 @@ envx.Append(LINKFLAGS='-Wl,-Map={},--cref'.format(map_filename))
 #
 #    Add command-line macros
 #
-apu_params = read_config('apu_params.yml')
-
 for p in apu_params:
     envx.Append(CPPDEFINES = '{}={}'.format(p, apu_params[p]))
     envx.Append(LINKFLAGS = '-Wl,"--defsym={}={}"'.format(p, apu_params[p]))

@@ -1,5 +1,4 @@
 
-#define __ARM_NEON__ 1
 //------------------------------------------------------------------------------
     .global _vector_table
 
@@ -20,13 +19,14 @@ _vector_table:
 //------------------------------------------------------------------------------
 irq:
 
-#ifdef __ARM_NEON__
-      vpush {d0-d7}
-      vpush {d16-d31}
-      vmrs r1, FPSCR
-      push {r1}
-      vmrs r1, FPEXC
-      push {r1}
+    stmdb   sp!,{r0-r3,r12,lr}
+#if FPU_ENABLE
+    vpush   {d0-d7}
+    vpush   {d16-d31}
+    vmrs     r1, fpscr
+    push    {r1}
+    vmrs    r1, fpexc
+    push    {r1}
 #endif
 
 #ifdef PROFILING
@@ -37,32 +37,32 @@ irq:
 
     bl  irq_handler
 
-#ifdef __ARM_NEON__
-      pop     {r1}
-      vmsr    FPEXC, r1
-      pop     {r1}
-      vmsr    FPSCR, r1
-      vpop    {d16-d31}
-      vpop    {d0-d7}
+#if FPU_ENABLE
+    pop     {r1}
+    vmsr    fpexc, r1
+    pop     {r1}
+    vmsr    fpscr, r1
+    vpop    {d16-d31}
+    vpop    {d0-d7}
 #endif
-#ifdef __ARM_NEON__
-    vpush {d0-d7}
-    vpush {d16-d31}
-    vmrs r1, FPSCR
-    push {r1}
-    vmrs r1, FPEXC
-    push {r1}
     ldmia     sp!,{r0-r3,r12,lr}
 
     subs    pc, lr, #4                   // adjust LR to return from IRQ
 //------------------------------------------------------------------------------
 fiq:
     stmdb   sp!,{r0-r3,r12,lr}
+#if FPU_ENABLE
+    vpush   {d0-d7}
+    vpush   {d16-d31}
+    vmrs    r1, fpscr
+    push    {r1}
+    vmrs    r1, fpexc
+    push    {r1}
 #endif
 
     nop                                  // placeholder for FIQ hander
 
-#ifdef __ARM_NEON__
+#if FPU_ENABLE
     pop     {r1}
     vmsr    fpexc, r1
     pop     {r1}

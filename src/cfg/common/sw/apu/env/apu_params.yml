@@ -17,3 +17,5 @@ parameters:
     UART_TX_BUF_SIZE         : 1024
 
     NESTED_INTERRUPTS_ENABLE : 0
+
+    FPU_ENABLE               : 1
