@@ -192,8 +192,8 @@ envx.Append(CPPPATH = ['#lib/ps7mmr/const',
                        '#lib/z7lib',
                        '#lib/xil',
                        '#src/sw/include',
-                       '#src/sw/lib/scmrtos/core',
-                       '#src/sw/lib/scmrtos/port/zynq7k',
+                       '#lib/scmrtos/core',
+                       '#lib/scmrtos/port/zynq7k',
                        '#src/sw/apu/cam',
                        str(build_root / 'src')])
 

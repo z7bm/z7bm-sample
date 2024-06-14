@@ -7,11 +7,11 @@ sources:
     - src/sw/apu/cam/startup.c
     - src/sw/apu/cam/main.cpp
 
-    - src/sw/lib/scmrtos/core/os_kernel.cpp
-    - src/sw/lib/scmrtos/core/os_services.cpp
-    - src/sw/lib/scmrtos/port/zynq7k/os_target.cpp
-    - src/sw/lib/scmrtos/port/zynq7k/os_target_asm.S
-    - src/sw/lib/scmrtos/port/zynq7k/exc_vectors.S
+    - lib/scmrtos/core/os_kernel.cpp
+    - lib/scmrtos/core/os_services.cpp
+    - lib/scmrtos/port/zynq7k/os_target.cpp
+    - lib/scmrtos/port/zynq7k/os_target_asm.S
+    - lib/scmrtos/port/zynq7k/exc_vectors.S
 
 
 
