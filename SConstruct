@@ -1,4 +1,10 @@
-
+#-------------------------------------------------------------------------------
+#
+#    Root construction script
+#
+#    Author: Harry E. Zhurov
+#
+#-------------------------------------------------------------------------------
 
 import os
 import sys
@@ -8,8 +14,18 @@ sys.dont_write_bytecode = True
 import sys
 
 sys.path.append( '.scons_ext' )
+sys.path.append( 'src/cfg/common' )
 
-from helpers import *
+from bslib   import process_prjopt
+#from helpers import set_comstr
+import helpers as hlp
+
+#-------------------------------------------------------------------------------
+#
+#     Add user-defined options
+#
+AddOption('--verbose', action='store_true',  help='print full command lines of launched tools')
+
 
 #-------------------------------------------------------------------------------
 #
@@ -19,9 +35,7 @@ help_info ="""
 ********************************************************************************     
     Available variants:
     ~~~~~~~~~~~~~~~~~~~
-        7a35t
-        7a50t
-        ac701
+    zed
      
     Usage:
     ~~~~~  
@@ -63,13 +77,21 @@ if not os.path.exists(variant_path):
 
 #-------------------------------------------------------------------------------
 #
+#    Project Options (Features)
+#
+optnames = []
+
+#-------------------------------------------------------------------------------
+#
 #    Environment
 #
 envx = Environment() #( tools = {} )
 
-envx['BUILD_VARIANT'] = variant
+envx['BUILD_VARIANT']   = variant
+envx['PROJECT_OPTIONS'] = process_prjopt(optnames)
 
-set_comstr(envx)
+if GetOption('verbose') == None:
+    hlp.set_comstr(envx)
 
 #SConscript(variant_path, exports='envx', variant_dir = '#build/' + variant_name, duplicate = 0)
 SConscript(variant_path, exports='envx')

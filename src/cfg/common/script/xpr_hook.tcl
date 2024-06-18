@@ -106,6 +106,18 @@ foreach f $impl_xdc {
     }    
 }
 #-------------------------------------------------------------------------------
+set xsa_name lwircam.xsa
+
+write_hw_platform -fixed -force -minimal  -file $BUILD_DIR/src/$xsa_name
+exec unzip -o -d $BUILD_DIR/src/lwircam_hw $BUILD_DIR/src/$xsa_name
+
+file copy -force {*}[glob $BUILD_DIR/src/lwircam_hw/*.h]   $BUILD_DIR/src
+file copy -force {*}[glob $BUILD_DIR/src/lwircam_hw/*.c]   $BUILD_DIR/src
+file copy -force {*}[glob $BUILD_DIR/src/lwircam_hw/*.tcl] $BUILD_DIR/src
+
+file delete -force -- $BUILD_DIR/src/lwircam_hw
+
+#-------------------------------------------------------------------------------
 #
 #    Versal ACAP NoC Sim support
 #
