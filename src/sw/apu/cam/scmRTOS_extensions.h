@@ -1,6 +1,6 @@
 //------------------------------------------------------------------------------
 //
-//    C/C++ Startup Source
+//    scmRTOS Extensions Header
 //
 //    Permission is hereby granted, free of charge, to any person
 //    obtaining  a copy of this software and associated documentation
@@ -21,51 +21,16 @@
 //    TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
 //    THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
-//    Copyright (c) 2017-2024, Zynq-7000 Bare-metal Project
+//    Author: Harry E. Zhurov
 //    -----------------------------------------------------
 //    Project sources: https://github.com/z7bm
 //
 //------------------------------------------------------------------------------
 
-#include <string.h>
-     
-//------------------------------------------------------------------------------
+#ifndef  scmRTOS_EXTENSIONS_H
+#define  scmRTOS_EXTENSIONS_H
 
-//extern unsigned char __idata_start[];
-//extern unsigned char __data_start[];
-//extern unsigned char __data_end[];
-extern unsigned char __bss_start[];
-extern unsigned char __bss_end[];
-extern unsigned char __stack[];
 
-extern int  main();
-
-__attribute__ ((weak))
-int  __low_level_init();
-void __libc_init_array();
-
-//------------------------------------------------------------------------------
-void __cstart()
-{
-//    __cpu_init();
-    //__asm__ __volatile__ ("    ldr r13, =%0;" :  : "" (__stack) );
-    if( __low_level_init() )
-    {
-      //  memcpy(__data_start, __idata_start, __data_end - __data_start); // copy initialized variables
-        memset(__bss_start, 0, __bss_end - __bss_start);                // zero-fill uninitialized variables
-        __libc_init_array();                                            // low-level init & ctor loop
-    }
-    main();
-}
-//------------------------------------------------------------------------------
-__attribute__ ((weak))
-void _init()
-{
-}
-//------------------------------------------------------------------------------
-int __low_level_init()
-{
-    return 1;
-}
-//------------------------------------------------------------------------------
+#endif // scmRTOS_EXTENSIONS_H
+//-----------------------------------------------------------------------------
 

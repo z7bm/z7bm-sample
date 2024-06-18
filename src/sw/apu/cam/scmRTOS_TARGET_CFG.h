@@ -1,6 +1,6 @@
 //------------------------------------------------------------------------------
 //
-//    C/C++ Startup Source
+//    scmRTOS Project-level Target Configuration Header
 //
 //    Permission is hereby granted, free of charge, to any person
 //    obtaining  a copy of this software and associated documentation
@@ -21,51 +21,44 @@
 //    TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
 //    THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
-//    Copyright (c) 2017-2024, Zynq-7000 Bare-metal Project
+//    Author: Harry E. Zhurov
 //    -----------------------------------------------------
 //    Project sources: https://github.com/z7bm
 //
 //------------------------------------------------------------------------------
 
-#include <string.h>
-     
-//------------------------------------------------------------------------------
-
-//extern unsigned char __idata_start[];
-//extern unsigned char __data_start[];
-//extern unsigned char __data_end[];
-extern unsigned char __bss_start[];
-extern unsigned char __bss_end[];
-extern unsigned char __stack[];
-
-extern int  main();
-
-__attribute__ ((weak))
-int  __low_level_init();
-void __libc_init_array();
+#ifndef  scmRTOS_TARGET_CFG_H
+#define  scmRTOS_TARGET_CFG_H
 
 //------------------------------------------------------------------------------
-void __cstart()
-{
-//    __cpu_init();
-    //__asm__ __volatile__ ("    ldr r13, =%0;" :  : "" (__stack) );
-    if( __low_level_init() )
-    {
-      //  memcpy(__data_start, __idata_start, __data_end - __data_start); // copy initialized variables
-        memset(__bss_start, 0, __bss_end - __bss_start);                // zero-fill uninitialized variables
-        __libc_init_array();                                            // low-level init & ctor loop
-    }
-    main();
-}
+// If the macro value is 0 (the default), the port uses SysTick as a system
+// timer. It initializes the timer and starts it. The user must make sure that
+// the address of the timer interrupt handler (SysTick_Handler) is in the right
+// place at the interrupt vector table.
+// If the macro value is 1, then the user has to implement (see docs for details):
+//     1. extern "C" void __init_system_timer();
+//     2. void LOCK_SYSTEM_TIMER() / void UNLOCK_SYSTEM_TIMER();
+//     3. In the interrupt handler of the custom timer, the user needs to call
+//        OS::system_timer_isr().
+//
+#define SCMRTOS_USE_CUSTOM_TIMER 0
+
 //------------------------------------------------------------------------------
-__attribute__ ((weak))
-void _init()
-{
-}
+// Define SysTick clock frequency and its interrupt rate in Hz.
+// It makes sense if USE_CUSTOM_TIMER = 0.
+//
+//#if   defined(STM32F10X_LD_VL) || defined(STM32F10X_MD_VL) || defined(STM32F10X_HD_VL)
+//# define SYSTICKFREQ     24000000UL
+//#else
+//# define SYSTICKFREQ     72000000UL
+//#endif
+//#define SYSTICKINTRATE  1000
+
 //------------------------------------------------------------------------------
-int __low_level_init()
-{
-    return 1;
-}
-//------------------------------------------------------------------------------
+// Define number of priority bits implemented in hardware.
+//
+// #define CORE_PRIORITY_BITS  4
+
+
+#endif // scmRTOS_TARGET_CFG_H
 

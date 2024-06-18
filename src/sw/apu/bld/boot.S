@@ -88,7 +88,7 @@
 .global __abort_stack
 .global __fiq_stack
 .global __undef_stack
-.global _vector_table
+.global  _vector_table
 
 .set PSS_L2CC_BASE_ADDR, 0xF8F02000
 .set PSS_SLCR_BASE_ADDR, 0xF8000000
@@ -391,12 +391,14 @@ Sync:   ldr r1, [r0]
     mrc p15, 0, r1, c1, c0, 2                    //  read cp access control register (CACR) into r1 */
     orr r1, r1, #(0xf << 20)                     //  enable full access for p10 & p11 */
     mcr p15, 0, r1, c1, c0, 2                    //  write back into CACR */
-                                                 //
+
+#if FPU_ENABLE                                   //
     /* enable vfp */                             //
     fmrx    r1, FPEXC                            //  read the exception register */
     orr r1,r1, #FPEXC_EN                         //  set VFP enable bit, leave the others in orig state */
     fmxr    FPEXC, r1                            //  write back the exception register */
-                                                 //
+#endif                                           //
+
     mrc p15,0,r0,c1,c0,0                         //  flow prediction enable */
     orr r0, r0, #(0x01 << 11)                    //  #0x8000 */
     mcr p15,0,r0,c1,c0,0                         //

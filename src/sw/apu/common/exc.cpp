@@ -4,7 +4,7 @@
 #include <array>
 #include "z7int.h"
 
-extern TISRHandler PS7Handlers[PS7_MAX_IRQ_ID];
+extern isr_ptr_t ps7_handlers[PS7_MAX_IRQ_ID];
 
 //------------------------------------------------------------------------------
 class IntIdStack
@@ -39,27 +39,31 @@ IntIdStack int_id_stack;
 extern "C"
 {
 
-intptr_t PrefetchAbortAddr;
-intptr_t DataAbortAddr;
-intptr_t UndefinedExceptionAddr;
+intptr_t prefetch_abort_addr;
+intptr_t data_abort_addr;
+intptr_t undefined_exception_addr;
 
 //------------------------------------------------------------------------------
-void IRQInterrupt()             
+void irq_handler()
 { 
     const uint32_t INT_ID = int_id_stack.save();
     if (INT_ID < PS7_MAX_IRQ_ID)
     {
-        (*PS7Handlers[INT_ID])();
+    #if NESTED_INTERRUPTS_ENABLE == 1
+        enable_nested_interrupts();
+    #endif
+        (*ps7_handlers[INT_ID])();
+    #if NESTED_INTERRUPTS_ENABLE == 1
+        disable_nested_interrupts();
+    #endif
     }
     int_id_stack.restore();
 }
 //------------------------------------------------------------------------------
 
-void FIQInterrupt()             { }
-void UndefinedException()       { }
-void SWInterrupt()              { }
-void DataAbortInterrupt()       { }
-void PrefetchAbortInterrupt()   { }
+void undefined_exception()       { }
+void data_abort_exception()      { }
+void prefetch_abort_exception()  { }
 
 }  // extern "C"
 //------------------------------------------------------------------------------
